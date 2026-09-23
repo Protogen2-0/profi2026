@@ -36,11 +36,27 @@ export default class Contract  {
         return await this.contract.withdrawFull();
     }
 
-    async destributeToMarkets(address1, address2, address3){
-        return await this.contract.destributeToMarkets();
+    async distributeToMarkets(address1, address2, address3){
+        return await this.contract.destributeToMarkets(address1, address2, address3); // distribute
     }
 
     async deposit(amount){
         return await this.contract.deposit(amount);
+    }
+
+    async getVault() {
+        return await this.contract.getVault();
+    }
+
+    async getMarket(){
+        return await this.contract.getMarket();
+    }
+
+    async getUserVault(){
+        return await this.contract.getUserVault();
+    }
+
+    async getUserMarket(){
+        return await this.contract.getUserMarket();
     }
 }

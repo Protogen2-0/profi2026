@@ -1,0 +1,29 @@
+using browser provider
+Contract.jsx:16 provider: 
+BrowserProvider {#subs: Map(0), #plugins: Map(0), #pausedState: null, #destroyed: false, #networkPromise: null, …}
+Contract.jsx:21 signer: undefined
+Contract.jsx:26 contract: undefined
+2
+Contract.jsx:70 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'getUserVault')
+    at MyContract.getUserVault (Contract.jsx:70:36)
+    at User.jsx:18:68
+    at Array.forEach (<anonymous>)
+    at User.jsx:17:16
+3
+Contract.jsx:74 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'getUserMarket')
+    at MyContract.getUserMarket (Contract.jsx:74:36)
+    at User.jsx:21:69
+    at Array.forEach (<anonymous>)
+    at User.jsx:20:17
+2
+Contract.jsx:70 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'getUserVault')
+    at MyContract.getUserVault (Contract.jsx:70:36)
+    at User.jsx:18:68
+    at Array.forEach (<anonymous>)
+    at User.jsx:17:16
+3
+Contract.jsx:74 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'getUserMarket')
+    at MyContract.getUserMarket (Contract.jsx:74:36)
+    at User.jsx:21:69
+    at Array.forEach (<anonymous>)
+    at User.jsx:20:17

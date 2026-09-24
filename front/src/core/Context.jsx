@@ -11,7 +11,7 @@ const ContextProvider = ({ children }) => {
         const account = accounts[0]
         setWallet(account)
         localStorage.setItem("wallet", JSON.stringify(account))
-        console.log(account)
+        console.log("wallet added:", account)
     }
 
     const logout = async() => {

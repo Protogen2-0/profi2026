@@ -1,10 +1,9 @@
 import {Header} from "../components/Header.jsx";
 import {useContext, useEffect, useState} from "react";
 import {MyContext} from "../../core/Context.jsx";
-import {Markets, Vaults} from "../../service/contracts.js";
-import Contract from "../../service/Contract.jsx";
+import {Markets} from "../../service/contracts.js";
+import MyContract from "../../service/Contract.jsx";
 import {Button, ButtonGroup, Card, FormControl, FormGroup} from "react-bootstrap";
-import {DistributeToMarkets} from "../components/DistributeToMarkets.jsx";
 import {WithdrawFull} from "../components/WithdrawFull.jsx";
 import {RepayFull} from "../components/RepayFull.jsx";
 
@@ -20,7 +19,7 @@ export const Market = () => {
     useEffect(()=>{
         const markets_ = [];
         Markets.forEach(m => {
-            markets_.push(new Contract(m.abi, m.address));
+            markets_.push(new MyContract(m.abi, m.address));
         })
         setMarkets(markets_);
     },[])

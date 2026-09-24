@@ -3,7 +3,7 @@ import {useContext, useEffect, useState} from "react";
 import {Header} from "../components/Header.jsx";
 import {Button, Card} from "react-bootstrap";
 import {Markets, Vaults} from "../../service/contracts.js";
-import Contract from "../../service/Contract.jsx";
+import MyContract from "../../service/Contract.jsx";
 
 export const User = () =>{
     const {wallet, login} = useContext(MyContext)
@@ -15,10 +15,10 @@ export const User = () =>{
         const vaultsData = []
         const marketsData = []
         Vaults.forEach(async (v)=>{
-            vaultsData.push(await new Contract(v.abi, v.address).getUserVault());
+            vaultsData.push(await new MyContract(v.abi, v.address).getUserVault());
         })
         Markets.forEach(async (m)=>{
-            marketsData.push(await new Contract(m.abi, m.address).getMarket());
+            marketsData.push(await new MyContract(m.abi, m.address).getUserMarket());
         })
         setVaults(vaultsData);
         setMarkets(marketsData);

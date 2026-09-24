@@ -1,7 +1,7 @@
 import {Header} from "../components/Header.jsx";
 import {useEffect, useState} from "react";
 import {Markets, Vaults} from "../../service/contracts.js";
-import Contract from "../../service/Contract.jsx";
+import MyContract from "../../service/Contract.jsx";
 import {Card} from "react-bootstrap";
 
 export const Dashboard = () => {
@@ -12,10 +12,10 @@ export const Dashboard = () => {
         const vaultsData = []
         const marketsData = []
         Vaults.forEach(async (v)=>{
-            vaultsData.push(await new Contract(v.abi, v.address).getVault());
+            vaultsData.push(await new MyContract(v.abi, v.address).getVault());
         })
         Markets.forEach(async (m)=>{
-            marketsData.push(await new Contract(m.abi, m.address).getMarket());
+            marketsData.push(await new MyContract(m.abi, m.address).getMarket());
         })
         setVaults(vaultsData);
         setMarkets(marketsData);

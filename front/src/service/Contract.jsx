@@ -1,15 +1,29 @@
-import {ethers} from "ethers";
+import {Contract, ethers} from "ethers";
 
-export default class Contract  {
+export default class MyContract  {
     provider;
     signer;
 
     constructor(abi, address) {
-        this.provider = new ethers.BrowserProvider(window.ethereum)
-        this.signer = (async()=>{
-            return await this.provider.getSigner()
-        })
-        this.contract = new Contract(address, abi, this.signer);
+        if (window.ethereum == null) {
+            this.provider = ethers.getDefaultProvider()
+            console.log("using default provider")
+        }
+        else {
+            this.provider = new ethers.BrowserProvider(window.ethereum)
+            console.log("using browser provider")
+        }
+        console.log("provider:", this.provider);
+
+        this.provider.getSigner().then((signer) => {
+            this.signer = signer;
+        });
+        console.log("signer:", this.signer);
+
+        (async()=>{
+            this.contract = await new Contract(address, abi, this.signer);
+        })()
+        console.log("contract:", this.contract);
     }
 
     async supply(amount){

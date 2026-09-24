@@ -2,7 +2,7 @@ import {Header} from "../components/Header.jsx";
 import {useContext, useEffect, useState} from "react";
 import {MyContext} from "../../core/Context.jsx";
 import {Vaults} from "../../service/contracts.js";
-import Contract from "../../service/Contract.jsx";
+import MyContract from "../../service/Contract.jsx";
 import {Button, ButtonGroup, Card, FormControl, FormGroup} from "react-bootstrap";
 import {DistributeToMarkets} from "../components/DistributeToMarkets.jsx";
 import {WithdrawFull} from "../components/WithdrawFull.jsx";
@@ -19,7 +19,7 @@ export const Vault = () => {
     useEffect(()=>{
         const vaults_ = [];
         Vaults.forEach(v => {
-            vaults_.push(new Contract(v.abi, v.address));
+            vaults_.push(new MyContract(v.abi, v.address));
         })
         setVaults(vaults_);
     },[])

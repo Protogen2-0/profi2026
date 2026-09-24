@@ -33,29 +33,32 @@ export const Vault = () => {
             <Header />
             {wallet ?
                 vaults.map((vault, i) => (
-                    <Card key={i}>
-                        <Card.Header>{vault.title}</Card.Header>
-                        <Card.Body>
+                    <Card key={i} className="container">
+                        <Card.Header>vault {i + 1} {vault.address}</Card.Header>
+                        <Card.Body className="container2">
                             <FormGroup>
+                                <h2> вложить снять </h2>
                                 <FormControl
                                     type={"number"}
                                     min={0}
                                     placeholder={"100"}
                                     value={amount}
-                                    onChange={e => setAmount(e.target.value[0])}
+                                    onChange={e => setAmount(e.target.value)}
                                 />
                             </FormGroup>
                             <ButtonGroup>
                                 {actions.map((action) => (
-                                    <Button key={action} onClick={() => handle(vault, action)}>
+                                    <Button className="containerButton" key={action} onClick={() => handle(vault, action)}>
                                         {action}
                                     </Button>
                                 ))}
                             </ButtonGroup>
+
                             <DistributeToMarkets contract={vault} />
                             <WithdrawFull contract={vault} />
                         </Card.Body>
                     </Card>
+
                 ))
             : "no wallet provided"}
         </>

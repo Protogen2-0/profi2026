@@ -1,6 +1,6 @@
 import {Button, ButtonGroup} from "react-bootstrap";
 
-export const RepayFull = (contract) => {
+export const RepayFull = ({contract}) => {
     const handle = async () => {
         await contract.repayFull();
     }

@@ -10,7 +10,7 @@ const ContextProvider = ({ children }) => {
         const accounts = await window.ethereum.request({method: "eth_requestAccounts"})
         const account = accounts[0]
         setWallet(account)
-        localStorage.setItem("wallet", JSON.stringify(account))
+        localStorage.setItem("wallet", account)
         console.log("wallet added:", account)
     }
 

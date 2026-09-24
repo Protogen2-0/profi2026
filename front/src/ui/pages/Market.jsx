@@ -33,29 +33,32 @@ export const Market = () => {
             <Header />
             {wallet ?
                 markets.map((market, i) => (
-                    <Card key={i}>
-                        <Card.Header>{market.title}</Card.Header>
-                        <Card.Body>
+                    <div key={i} className="container">
+                        <h>market {i + 1} {market.address}</h>
+                        <div>
                             <FormGroup>
                                 <FormControl
                                     type={"number"}
                                     min={0}
                                     placeholder={"100"}
                                     value={amount}
-                                    onChange={e => setAmount(e.target.value[0])}
+                                    onChange={e => setAmount(e.target.value)}
                                 />
                             </FormGroup>
+
                             <ButtonGroup>
                                 {actions.map((action) => (
-                                    <Button key={action} onClick={() => handle(vault, action)}>
+                                    <Button key={action} onClick={() => handle(market, action)}>
                                         {action}
                                     </Button>
                                 ))}
                             </ButtonGroup>
+
                             <WithdrawFull contract={market} />
+
                             <RepayFull contract={market} />
-                        </Card.Body>
-                    </Card>
+                        </div>
+                    </div>
                 ))
                 : "no wallet provided"}
         </>

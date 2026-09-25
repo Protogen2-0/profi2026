@@ -1,29 +1,23 @@
-using browser provider
-Contract.jsx:16 provider: 
-BrowserProvider {#subs: Map(0), #plugins: Map(0), #pausedState: null, #destroyed: false, #networkPromise: null, …}
-Contract.jsx:21 signer: undefined
-Contract.jsx:26 contract: undefined
-2
-Contract.jsx:70 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'getUserVault')
-    at MyContract.getUserVault (Contract.jsx:70:36)
-    at User.jsx:18:68
-    at Array.forEach (<anonymous>)
-    at User.jsx:17:16
-3
-Contract.jsx:74 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'getUserMarket')
-    at MyContract.getUserMarket (Contract.jsx:74:36)
-    at User.jsx:21:69
-    at Array.forEach (<anonymous>)
-    at User.jsx:20:17
-2
-Contract.jsx:70 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'getUserVault')
-    at MyContract.getUserVault (Contract.jsx:70:36)
-    at User.jsx:18:68
-    at Array.forEach (<anonymous>)
-    at User.jsx:17:16
-3
-Contract.jsx:74 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'getUserMarket')
-    at MyContract.getUserMarket (Contract.jsx:74:36)
-    at User.jsx:21:69
-    at Array.forEach (<anonymous>)
-    at User.jsx:20:17
+inpage.js:7 MetaMask - RPC Error: Internal JSON-RPC error. 
+{code: -32603, message: 'Internal JSON-RPC error.', data: {…}, stack: '{\n  "code": -32603,\n  "message": "Internal JSON-RP…odbefgpgknn/4065.9553dc0b8f48844f1d27.js:25:15630'}
+code
+: 
+-32603
+data
+: 
+{code: 3, message: 'execution reverted', data: '0xfb8f41b20000000000000000000000009b00459e704d3699…000000000000000000000000000000001158e460913d00000', cause: null}
+message
+: 
+"Internal JSON-RPC error."
+stack
+: 
+"{\n  \"code\": -32603,\n  \"message\": \"Internal JSON-RPC error.\",\n  \"data\": {\n    \"code\": 3,\n    \"message\": \"execution reverted\",\n    \"data\": \"0xfb8f41b20000000000000000000000009b00459e704d3699b3b00ed6abb26f5705efc6570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001158e460913d00000\",\n    \"cause\": null\n  },\n  \"stack\": \"Error: Internal JSON-RPC error.\\n    at a (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/8381.6f66533758d10f2240d8.js:2054:19892)\\n    at a (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/8381.6f66533758d10f2240d8.js:2058:193014)\\n    at Object.internal (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/8381.6f66533758d10f2240d8.js:2058:191757)\\n    at chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:15:17844\\n    at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:40301\\n    at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:40301\\n    at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:1:181559\\n    at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:40301\\n    at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:16:14694\\n    at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:40301\\n    at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:40301\\n    at async w.l (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:39919)\\n    at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:39364\\n    at async w.l (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:39919)\\n    at async w.handle (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:39122)\\n    at async l.<anonymous> (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:12:36372)\\n    at async l.request (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:12:36593)\\n    at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:9:4975\\n    at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:25:15630\"\n}\n  at a (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/8381.6f66533758d10f2240d8.js:2054:19892)\n  at a (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/8381.6f66533758d10f2240d8.js:2058:193014)\n  at Object.internal (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/8381.6f66533758d10f2240d8.js:2058:191757)\n  at chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:15:17844\n  at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:40301\n  at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:40301\n  at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:1:181559\n  at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:40301\n  at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:16:14694\n  at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:40301\n  at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:40301\n  at async w.l (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:39919)\n  at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:39364\n  at async w.l (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:39919)\n  at async w.handle (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:5:39122)\n  at async l.<anonymous> (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:12:36372)\n  at async l.request (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:12:36593)\n  at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/5113.6eec75937d5c6af28373.js:9:4975\n  at async chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/4065.9553dc0b8f48844f1d27.js:25:15630"
+[[Prototype]]
+: 
+Object
+ethers.js?v=76c6c525:163 Uncaught (in promise) Error: execution reverted (unknown custom error) (action="estimateGas", data="0xfb8f41b20000000000000000000000009b00459e704d3699b3b00ed6abb26f5705efc6570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001158e460913d00000", reason=null, transaction={ "data": "0x35403023000000000000000000000000000000000000000000000001158e460913d00000", "from": "0x8E063311dc0eD67c2bcDd876C1C5fF54aC7403a5", "to": "0x5C2A0043DCB069170132cC9d8930Bb92C55dC309" }, invocation=null, revert=null, code=CALL_EXCEPTION, version=6.17.0)
+await in send		
+(anonymous)	@	Contract.jsx:30
+await in (anonymous)		
+(anonymous)	@	Market.jsx:31
+(anonymous)	@	Market.jsx:52

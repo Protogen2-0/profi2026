@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {Button, ButtonGroup, FormControl, FormGroup} from "react-bootstrap";
+import {Button, FormControl, FormGroup} from "react-bootstrap";
 
 export const DistributeToMarkets = ({contract}) => {
 
@@ -14,7 +14,6 @@ export const DistributeToMarkets = ({contract}) => {
     return (
         <>
             <FormGroup>
-                <hr/>
                 <h2>распределение по markets</h2>
                 <FormControl
                     type={"address"}
@@ -37,11 +36,9 @@ export const DistributeToMarkets = ({contract}) => {
                     onChange={e => setAddress3(e.target.value)}
                 />
             </FormGroup>
-            <ButtonGroup>
-                <Button className="containerButton" onClick={() => handle(address1, address2, address3)}>
-                    distributeToMarkets
-                </Button>
-            </ButtonGroup>
+            <Button className="containerButton" onClick={() => handle(address1, address2, address3)}>
+                distributeToMarkets
+            </Button>
         </>
     )
 }

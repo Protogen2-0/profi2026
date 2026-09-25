@@ -3,7 +3,7 @@ import {useContext, useEffect, useState} from "react";
 import {MyContext} from "../../core/Context.jsx";
 import {Markets} from "../../service/contracts.js";
 import MyContract from "../../service/Contract.jsx";
-import {Button, ButtonGroup, Card, FormControl, FormGroup} from "react-bootstrap";
+import {Button, Col, FormControl, Row} from "react-bootstrap";
 import {WithdrawFull} from "../components/WithdrawFull.jsx";
 import {RepayFull} from "../components/RepayFull.jsx";
 
@@ -17,11 +17,14 @@ export const Market = () => {
     const [markets, setMarkets] = useState([])
 
     useEffect(()=>{
-        const markets_ = [];
-        Markets.forEach(m => {
-            markets_.push(new MyContract(m.abi, m.address));
-        })
-        setMarkets(markets_);
+        if(wallet){
+            const markets_ = [];
+            Markets.forEach(m => {
+                markets_.push(new MyContract(m.abi, m.address));
+            })
+            setMarkets(markets_);
+            console.log("markets: ", markets_)
+        }
     },[])
 
     const handle = async (market, action) => {
@@ -34,30 +37,31 @@ export const Market = () => {
             {wallet ?
                 markets.map((market, i) => (
                     <div key={i} className="container">
-                        <h>market {i + 1} {market.address}</h>
-                        <div>
-                            <FormGroup>
-                                <FormControl
-                                    type={"number"}
-                                    min={0}
-                                    placeholder={"100"}
-                                    value={amount}
-                                    onChange={e => setAmount(e.target.value)}
-                                />
-                            </FormGroup>
-
-                            <ButtonGroup>
-                                {actions.map((action) => (
-                                    <Button key={action} onClick={() => handle(market, action)}>
-                                        {action}
-                                    </Button>
+                        <h2>market  {i + 1} {market.address}</h2>
+                        <Row className={"container2"}>
+                            <Col className={"column"}>
+                                {actions.map((action, i) => (
+                                    <div key={i}>
+                                        <h3>{action}</h3>
+                                        <FormControl
+                                            type={"number"}
+                                            min={0}
+                                            placeholder={"100"}
+                                            onChange={e => setAmount(e.target.value)}
+                                        />
+                                        <Button className="containerButton" onClick={() => handle(market, action)}>
+                                            {action}
+                                        </Button>
+                                    </div>
                                 ))}
-                            </ButtonGroup>
-
-                            <WithdrawFull contract={market} />
-
-                            <RepayFull contract={market} />
-                        </div>
+                            </Col>
+                            <Col className={"column"}>
+                                <RepayFull contract={market}/>
+                            </Col>
+                            <Col className={"column"}>
+                                <WithdrawFull contract={market} />
+                            </Col>
+                        </Row>
                     </div>
                 ))
                 : "no wallet provided"}

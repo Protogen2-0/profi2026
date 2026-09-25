@@ -7,8 +7,9 @@ export const RepayFull = ({contract}) => {
 
     return (
         <>
+            <h2>полное погашение</h2>
             <ButtonGroup>
-                <Button onClick={() => handle()}>
+                <Button className={"containerButton"} onClick={() => handle()}>
                     repayFull
                 </Button>
             </ButtonGroup>

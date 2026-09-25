@@ -6,14 +6,13 @@ export const WithdrawFull = ({contract}) => {
     }
 
     return (
-        <>
-            <hr/>
+        <div style={{verticalAlign: "center"}}>
             <h2>вывод средств</h2>
             <ButtonGroup>
                 <Button className="containerButton" onClick={() => handle()}>
                     withdrawFull
                 </Button>
             </ButtonGroup>
-        </>
+        </div>
     )
 }

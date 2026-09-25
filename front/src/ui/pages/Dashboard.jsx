@@ -2,43 +2,65 @@ import {Header} from "../components/Header.jsx";
 import {useEffect, useState} from "react";
 import {Markets, Vaults} from "../../service/contracts.js";
 import MyContract from "../../service/Contract.jsx";
-import {Card} from "react-bootstrap";
+import {Col, Row} from "react-bootstrap";
 
 export const Dashboard = () => {
     const [vaults, setVaults] = useState([]);
     const [markets, setMarkets] = useState([]);
 
     useEffect(() => {
-        const vaultsData = []
-        const marketsData = []
+        let vaultsData = []
         Vaults.forEach(async (v)=>{
-            vaultsData.push(await new MyContract(v.abi, v.address).getVault());
-        })
+            vaultsData.push(new MyContract(v.abi, v.address))
+        });
+        (async()=>{
+            vaultsData = await Promise.all(
+                vaultsData.map(async (v)=>{
+                    const contract = new MyContract(v.abi, v.address);
+                    return await contract.getVault();
+                })
+            )
+            setVaults(vaultsData)
+        })()
+        console.log("vaultsData: ", vaultsData)
+
+        let marketsData = []
         Markets.forEach(async (m)=>{
-            marketsData.push(await new MyContract(m.abi, m.address).getMarket());
-        })
-        setVaults(vaultsData);
-        setMarkets(marketsData);
+            marketsData.push(new MyContract(m.abi, m.address))
+        });
+        (async()=>{
+            marketsData = await Promise.all(
+                marketsData.map(async (m)=>{
+                    const contract = new MyContract(m.abi, m.address);
+                    return await contract.getMarket();
+                })
+            )
+            setMarkets(marketsData)
+        })()
+        console.log("marketsData: ", marketsData)
     },[])
 
     return (
         <>
             <Header />
-
-            {vaults?.map((vault)=>(
-                <Card title={vault[2]}>
-                    <Card.Body>
-                        <p>assetToken: {vault[0]}</p>
-                        <p>APY:        {vault[1]}</p>
-                        <p>assets:     {vault[3]}</p>
-                        <p>totalSupply:{vault[4]}</p>
-                    </Card.Body>
-                </Card>
-            ))}
-
-            {markets?.map((market)=>(
-                <Card title={market[0]}>
-                    <Card.Body>
+            <Row>
+                {vaults.map((vault,i)=>(
+                    <Col className={"column"} key={vault}>
+                        <h2>{vault[2]}</h2>
+                        <p>address: {Markets[i].address}</p>
+                        <p>assetToken:  {vault[0]}</p>
+                        <p>APY:         {vault[1]}</p>
+                        <p>assets:      {vault[3]}</p>
+                        <p>totalSupply: {vault[4]}</p>
+                        <p>assetTokens: {vault[5]}</p>
+                    </Col>
+                ))}
+            </Row>
+            <Row>
+                {markets.map((market,i)=>(
+                    <Col className={"column"} key={market}>
+                        <h2>{market[0]}</h2>
+                        <p>address: {Markets[i].address}</p>
                         <p>USDT_UCDC_cost:     {market[1]}</p>
                         <p>USD1_USDC_cost:     {market[2]}</p>
                         <p>USDC_USD_cost:      {market[3]}</p>
@@ -49,16 +71,17 @@ export const Dashboard = () => {
                         <p>currentBorrowIndex: {market[8]}</p>
                         <p>InterestRate:       {market[9]}</p>
                         <p>vault:              {market[10]}</p>
-                        <p>admin:              {market[12]}</p>
-                        <p>collateralToken:    {market[13]}</p>
-                        <p>borrowToken:        {market[14]}</p>
-                        <p>collateralShare:    {market[15]}</p>
-                        <p>borrowShare:        {market[16]}</p>
+                        <p>admin:              {market[11]}</p>
+                        <p>collateralToken:    {market[12]}</p>
+                        <p>borrowToken:        {market[13]}</p>
+                        <p>collateralShare:    {market[14]}</p>
+                        <p>borrowShare:        {market[15]}</p>
+                        <p>borrowTokens:       {market[16]}</p>
+                        <p>collateralTokens:   {market[17]}</p>
                         <p>protocol revenue:   30% Fee     </p>
-                    </Card.Body>
-                </Card>
-            ))}
-
+                    </Col>
+                ))}
+            </Row>
         </>
     )
 }

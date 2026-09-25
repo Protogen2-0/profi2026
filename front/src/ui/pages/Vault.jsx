@@ -3,7 +3,7 @@ import {useContext, useEffect, useState} from "react";
 import {MyContext} from "../../core/Context.jsx";
 import {Vaults} from "../../service/contracts.js";
 import MyContract from "../../service/Contract.jsx";
-import {Button, ButtonGroup, Card, FormControl, FormGroup} from "react-bootstrap";
+import {Button, Col, FormControl, Row} from "react-bootstrap";
 import {DistributeToMarkets} from "../components/DistributeToMarkets.jsx";
 import {WithdrawFull} from "../components/WithdrawFull.jsx";
 
@@ -17,11 +17,14 @@ export const Vault = () => {
     const [vaults, setVaults] = useState([])
 
     useEffect(()=>{
-        const vaults_ = [];
-        Vaults.forEach(v => {
-            vaults_.push(new MyContract(v.abi, v.address));
-        })
-        setVaults(vaults_);
+        if(wallet){
+            const vaults_ = [];
+            Vaults.forEach(v => {
+                vaults_.push(new MyContract(v.abi, v.address));
+            })
+            setVaults(vaults_);
+            console.log("vaults: ", vaults_)
+        }
     },[])
 
     const handle = async (vault, action) => {
@@ -33,32 +36,33 @@ export const Vault = () => {
             <Header />
             {wallet ?
                 vaults.map((vault, i) => (
-                    <Card key={i} className="container">
-                        <Card.Header>vault {i + 1} {vault.address}</Card.Header>
-                        <Card.Body className="container2">
-                            <FormGroup>
-                                <h2> вложить снять </h2>
-                                <FormControl
-                                    type={"number"}
-                                    min={0}
-                                    placeholder={"100"}
-                                    value={amount}
-                                    onChange={e => setAmount(e.target.value)}
-                                />
-                            </FormGroup>
-                            <ButtonGroup>
-                                {actions.map((action) => (
-                                    <Button className="containerButton" key={action} onClick={() => handle(vault, action)}>
-                                        {action}
+                    <div key={i} className="container">
+                        <h2>vault  {i + 1} {vault.address}</h2>
+                        <Row className={"container2"}>
+                            <Col className={"column"}>
+                            {actions.map((action,i ) => (
+                                <div key={i}>
+                                    <h3>{action}</h3>
+                                    <FormControl
+                                        type={"number"}
+                                        min={0}
+                                        placeholder={"100"}
+                                        onChange={e => setAmount(e.target.value)}
+                                    />
+                                    <Button className="containerButton" onClick={() => handle(vault, action)}>
+                                            {action}
                                     </Button>
-                                ))}
-                            </ButtonGroup>
-
-                            <DistributeToMarkets contract={vault} />
-                            <WithdrawFull contract={vault} />
-                        </Card.Body>
-                    </Card>
-
+                                </div>
+                            ))}
+                            </Col>
+                            <Col className={"column"}>
+                               <DistributeToMarkets contract={vault}/>
+                            </Col>
+                            <Col className={"column"}>
+                                <WithdrawFull contract={vault} />
+                            </Col>
+                        </Row>
+                    </div>
                 ))
             : "no wallet provided"}
         </>

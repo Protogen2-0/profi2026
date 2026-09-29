@@ -20,6 +20,8 @@ contract Market is ERC4626Upgradeable {
     uint InterestRate;
     address vault; // address which will receive 70% from fee 
     address admin; // address which will receive 30% from fee
+    uint borrowPrice; // %
+    uint collateralPrice; // %
 
     Token collateralToken;
     Token borrowToken;
@@ -44,10 +46,12 @@ contract Market is ERC4626Upgradeable {
         LLTV = LLTV_;
         blocksPerYear = 2102400;
         lastAccureBlock = block.number;
-        currentBorrowIndex = borrowIndex;
+        currentBorrowIndex = currentBorrowIndex == 0 ? 1e18 : borrowIndex;
         InterestRate = InterestRate_;
         vault = vault_;
         admin = admin_;
+        borrowPrice = 100;
+        collateralPrice = 100;
         collateralToken = collateralToken_;
         borrowToken     = borrowToken_;
         collateralShare = new Share(address(collateralToken_), collateralToken_.name(), collateralToken_.symbol(), collateralToken_.decimals());
@@ -65,29 +69,22 @@ contract Market is ERC4626Upgradeable {
     }
 
     function LTV(address user) public view returns(uint){
-        // formula : (borrowAmount * borrowPrice) / (collateralAmount * collateralPrice) * 100(%)
-        // "price" is how many assets you will receive for 1 share token, e.g. if 2 shares will give 1 asset
-        // price will be described as 0.5 OR (1 / 2) where "2" can be moved to denominator.
-        // same way we calculate collateralPrice, but we move "2" to numenator since price param is in denominator
-        // instead of numerator as borrowPrice, both "2" in numerator and demonimator is canceled out 
-        // due to inverse fractions and we have only "convertToAssets" calls. 
-        // and if we use same number of shares to calculate prices, we will receive correct result  
-        return // collateralShare.balanceOf(msg.sender) == 0 ? 0 :
-        ( (borrowShare.balanceOf(user) + accruedInterest(user)) * borrowShare.convertToAssets(2**100) ) / 
-        ( collateralShare.balanceOf(user) * collateralShare.convertToAssets(2**100) ) * 
-        100; 
-        // 2**100 ~ 1T tokens. For each increace in 2**10, amount of tokens will increace in ~ 1000, assuming 'decimals' is 18.
-        // e.g. 2**90 ~ 1M tokens, 2**110 ~ 1Q tokens etc. The more number is, result will be more accurate at the risk of overflow
+        // formula : 100(%) * (borrowAmount * borrowPrice) / (collateralAmount * collateralPrice)
+        return collateralShare.balanceOf(msg.sender) == 0 ? 0 :
+        ( 100 * (borrowShare.balanceOf(user) + accruedInterest(user)) * borrowPrice ) / 
+        ( collateralShare.balanceOf(user) * collateralPrice ); 
     }
     
     function supply(uint amount) public updateIndexAndLTV() {
         collateralToken.transfer(msg.sender, address(this), amount);
-        collateralShare.mint(collateralShare.previewDeposit(amount), msg.sender);
+        collateralShare.mint(msg.sender, collateralShare.previewDeposit(amount));
     }
 
     function borrow(uint amount) public updateIndexAndLTV() {
+        if(borrowShare.balanceOf(msg.sender) == 0)
+            userBorrowIndexAtEntry[msg.sender] = currentBorrowIndex;
         borrowToken.transfer(address(this), msg.sender, amount);
-        borrowShare.mint(borrowShare.previewDeposit(amount), msg.sender);
+        borrowShare.mint(msg.sender, borrowShare.previewDeposit(amount) / currentBorrowIndex);
     }
 
     function repayPart(uint amount) public updateIndexAndLTV() {
@@ -153,5 +150,65 @@ contract Market is ERC4626Upgradeable {
         uint amount = collateralShare.maxWithdraw(msg.sender);
         collateralToken.transfer(address(this), msg.sender, amount);
         collateralShare.burn(msg.sender, collateralShare.previewWithdraw(amount));
+    }
+
+    function getMarket() public view returns(
+        string memory,
+        uint,
+        uint,
+        uint,
+        uint,
+        uint,
+        uint,
+        uint,
+        uint,
+        uint,
+        address,
+        address,
+        address,
+        address,
+        address,
+        address,
+        uint,
+        uint
+    ){
+        return(
+            title,
+            USDT_UCDC_cost,
+            USD1_USDC_cost,
+            USDC_USD_cost,
+            DAI_USDC_cost,
+            LLTV,
+            blocksPerYear,
+            lastAccureBlock,
+            currentBorrowIndex,
+            InterestRate,
+            vault,
+            admin,
+            address(collateralToken),
+            address(borrowToken),
+            address(collateralShare),
+            address(borrowShare),
+            borrowToken.balanceOf(address(this)),
+            collateralToken.balanceOf(address(this))
+        );
+    }
+
+    function getUserMarket() public view returns(
+        uint,
+        uint,
+        uint,
+        uint,
+        uint,
+        uint
+    ){
+        return(
+            userBorrowIndexAtEntry[msg.sender],
+            collateralShare.balanceOf(msg.sender),
+            borrowShare.balanceOf(msg.sender),
+            LTV(msg.sender),
+            borrowToken.balanceOf(msg.sender),
+            collateralToken.balanceOf(msg.sender)
+        );
     }
 }

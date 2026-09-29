@@ -14,7 +14,6 @@ contract Vault is ERC4626 {
         title = title_;
         assetToken = assetToken_;
         assetToken.mint(address(this), 10000 * 10 ** assetToken.decimals());
-        assetToken.mint(msg.sender, 1000 * 10 ** assetToken.decimals());
         APY = 10;
     }
 
@@ -22,7 +21,7 @@ contract Vault is ERC4626 {
         return assets;
     }
 
-    function destributeToMarkets(address proxyMarket1, address proxyMarket2, address proxyMarket3) public {
+    function destributeToMarkets(address proxyMarket1, address proxyMarket2, address proxyMarket3) public { //distribute
         uint transferAmount = assetToken.balanceOf(address(this)) / 6;
         assetToken.transfer(address(this), proxyMarket1, transferAmount);
         assetToken.transfer(address(this), proxyMarket2, transferAmount);
@@ -64,5 +63,13 @@ contract Vault is ERC4626 {
 
     function increaseAssets(uint amount) public {
         assets += amount;
+    }
+
+    function getVault() public view returns(address, uint, string memory, uint, uint, uint){
+        return(address(assetToken), APY, title, assets, totalSupply(), assetToken.balanceOf(address(this)));
+    }
+    
+    function getUserVault()  public view returns(uint, uint){
+        return(assetToken.balanceOf(msg.sender), balanceOf(msg.sender));
     }
 }

@@ -23,6 +23,8 @@ contract MyProxy is TransparentUpgradeableProxy{
     Token public borrowToken;
     Share public collateralShare;
     Share public borrowShare;
+    uint public borrowPrice;
+    uint public collateralPrice;
     mapping (address => uint) public userBorrowIndexAtEntry;
 
     constructor(address impl, bytes memory data) TransparentUpgradeableProxy(impl, msg.sender, data) payable {}

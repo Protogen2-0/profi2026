@@ -7,21 +7,22 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgrad
 contract Market is ERC4626Upgradeable {
 
     string title;
-    // calculating in %, e.g. 1 token1 = 1 token2 => cost = 100 (%)
-    uint USDT_UCDC_cost;
-    uint USD1_USDC_cost;
-    uint USDC_USD_cost;
-    uint DAI_USDC_cost; 
-    // calculating in % (e.g. 70% LLTV = 70)
+
     uint LLTV;
     uint blocksPerYear;
     uint lastAccureBlock;
     uint currentBorrowIndex;
     uint InterestRate;
+
     address vault; // address which will receive 70% from fee 
     address admin; // address which will receive 30% from fee
+
+    // calculating in % (e.g. 70% LLTV = 70)
     uint borrowPrice; // %
     uint collateralPrice; // %
+
+    uint WAD;
+    uint precition;
 
     Token collateralToken;
     Token borrowToken;
@@ -32,26 +33,23 @@ contract Market is ERC4626Upgradeable {
 
     // constructor()
     function init(
-        uint USDT_cost, uint USD1_cost, uint USDC_cost, uint DAI_cost, uint borrowIndex,
-        string memory title_, uint LLTV_, address vault_, address admin_, uint InterestRate_, 
-        Token collateralToken_, Token borrowToken_, uint64 version
+        uint borrowIndex,   string memory title_,   uint LLTV_,         address vault_,  address admin_, 
+        uint InterestRate_, Token collateralToken_, Token borrowToken_, uint64 version
     ) public reinitializer(version) {
         __ERC4626_init(IERC20(collateralToken_));
         __ERC20_init(collateralToken_.name(), collateralToken_.symbol());
         title = title_;
-        USDT_UCDC_cost = USDT_cost;
-        USD1_USDC_cost = USD1_cost;
-        USDC_USD_cost  = USDC_cost;
-        DAI_USDC_cost  = DAI_cost;
         LLTV = LLTV_;
         blocksPerYear = 2102400;
         lastAccureBlock = block.number;
         currentBorrowIndex = currentBorrowIndex == 0 ? 1e18 : borrowIndex;
-        InterestRate = InterestRate_;
+        InterestRate = InterestRate_ * 1e8;
         vault = vault_;
         admin = admin_;
         borrowPrice = 100;
         collateralPrice = 100;
+        WAD = 1e18;
+        precition = 1e12;
         collateralToken = collateralToken_;
         borrowToken     = borrowToken_;
         collateralShare = new Share(address(collateralToken_), collateralToken_.name(), collateralToken_.symbol(), collateralToken_.decimals());
@@ -59,43 +57,48 @@ contract Market is ERC4626Upgradeable {
     }
 
     modifier updateIndexAndLTV() {
-        currentBorrowIndex += currentBorrowIndex * InterestRate * (block.number - lastAccureBlock) / blocksPerYear;
+        currentBorrowIndex += currentBorrowIndex * InterestRate * (block.number - lastAccureBlock) / (blocksPerYear * precition);
+        lastAccureBlock = block.number;
         _;
         require(LTV(msg.sender) <= LLTV, "LTV is larger than LLTV");
     }
 
     function accruedInterest(address user) public view returns(uint){
-        return borrowShare.balanceOf(user) * ( currentBorrowIndex - userBorrowIndexAtEntry[user] );
+        return borrowShare.balanceOf(user) * (currentBorrowIndex - userBorrowIndexAtEntry[user]) / WAD;
+    }
+
+    function totalDept(address user) public view returns(uint){
+        return borrowShare.balanceOf(user) * currentBorrowIndex / WAD;
     }
 
     function LTV(address user) public view returns(uint){
         // formula : 100(%) * (borrowAmount * borrowPrice) / (collateralAmount * collateralPrice)
-        return collateralShare.balanceOf(msg.sender) == 0 ? 0 :
-        ( 100 * (borrowShare.balanceOf(user) + accruedInterest(user)) * borrowPrice ) / 
-        ( collateralShare.balanceOf(user) * collateralPrice ); 
+        return collateralShare.balanceOf(user) == 0 
+            ? LLTV + 1 
+            : ( 100 * totalDept(user) * borrowPrice ) / 
+              ( collateralShare.balanceOf(user) * collateralPrice ); 
     }
     
     function supply(uint amount) public updateIndexAndLTV() {
         collateralToken.transfer(msg.sender, address(this), amount);
-        collateralShare.mint(msg.sender, collateralShare.previewDeposit(amount));
+        collateralShare.mint(msg.sender, amount);
     }
 
     function borrow(uint amount) public updateIndexAndLTV() {
         if(borrowShare.balanceOf(msg.sender) == 0)
             userBorrowIndexAtEntry[msg.sender] = currentBorrowIndex;
         borrowToken.transfer(address(this), msg.sender, amount);
-        borrowShare.mint(msg.sender, borrowShare.previewDeposit(amount) / currentBorrowIndex);
+        borrowShare.mint(msg.sender, amount * WAD / currentBorrowIndex);
     }
 
     function repayPart(uint amount) public updateIndexAndLTV() {
         uint startInterest = accruedInterest(msg.sender);
-        // paying only %, doesnt burn any shares
+        uint amountToVault;
+        uint amountToAdmin;
+        // paying only %, doesnt burn any shares (payment will be after if-else)
         if(amount <= startInterest){
-            // transfering amount to vault and admin in 70:30 ratio
-            borrowToken.transfer(msg.sender, address(vault), (amount * 7 / 10));
-            borrowToken.transfer(msg.sender, admin, (amount * 3 / 10));
-            // telling vault that we sended him tokens
-            Vault(vault).increaseAssets(amount * 7 / 10);
+            amountToVault = amount * 7 / 10;
+            amountToAdmin = amount - amountToVault;
             // increasing entry borrow index to reduce user dept percentage, other params used in % formula shouldn't be changed
             // formula : currentInterest = borrowShares * (currentIndex - startIndex)
             // -> (currentInterest / borrowShares) = currentIndex - startIndex
@@ -105,57 +108,53 @@ contract Market is ERC4626Upgradeable {
             // so if we payed same amount as %, formula for % will give 0
             userBorrowIndexAtEntry[msg.sender] = currentBorrowIndex - ( (startInterest - amount) / borrowShare.balanceOf(msg.sender) );
         } 
-        // paying all % + some amount of dept
+        // paying all % + some amount of dept (first we pay dept body then % themself)
         else {
-            // transfering fee to vault and admin in 70:30 ratio
-            borrowToken.transfer(msg.sender, address(vault), (startInterest * 7 / 10));
-            borrowToken.transfer(msg.sender, admin, (startInterest * 3 / 10));
-            // telling vault that we sended him tokens
-            Vault(vault).increaseAssets(startInterest * 7 / 10);
+            amountToVault = startInterest * 7 / 10;
+            amountToAdmin = startInterest - amountToVault;
             // clearing dept percentage
             userBorrowIndexAtEntry[msg.sender] = currentBorrowIndex;
             // calculating amount of tokens which will reduce dept body
-            // if we payed more than we supposed to, function will revert when solidity tries to assign negative value to UINT
             uint payment = amount - startInterest;
             // transfering tokens to market and burning shares to reduce dept
             borrowToken.transfer(msg.sender, address(this), payment);
-            borrowShare.burn(msg.sender, borrowShare.previewWithdraw(payment));
+            borrowShare.burn(msg.sender, payment * WAD / currentBorrowIndex);
         }
+        // transfering fee to vault and admin in 70:30 ratio
+        borrowToken.transfer(msg.sender, vault, amountToVault);
+        borrowToken.transfer(msg.sender, admin, amountToAdmin);
+        // telling vault that we sended him tokens
+        Vault(vault).increaseAssets(amountToVault);
     }
 
     function repayFull() public updateIndexAndLTV() {
         // dept percentage
         uint interest = accruedInterest(msg.sender);
-        // transfering fee to vault and admin in 70:30 ratio (or 7:3)
-        borrowToken.transfer(msg.sender, address(vault), (interest * 7 / 10));
-        borrowToken.transfer(msg.sender, admin, (interest * 3 / 10));
+        // transfering fee to vault and admin in 70:30 ratio
+        borrowToken.transfer(msg.sender, vault, interest * 7 / 10);
+        borrowToken.transfer(msg.sender, admin, interest * 3 / 10);
         // telling vault that we sended him tokens
         Vault(vault).increaseAssets(interest * 7 / 10);
         // clearing dept percentage
         userBorrowIndexAtEntry[msg.sender] = currentBorrowIndex;
-        // dept itself
-        uint payment = borrowShare.maxWithdraw(msg.sender);
-        // transfering tokens to market AND burning all shares
-        borrowToken.transfer(msg.sender, address(this), payment);
-        borrowShare.burn(msg.sender, borrowShare.previewWithdraw(payment));
-        lastAccureBlock = block.number;
+        // transfering dept body to market and burning all shares
+        borrowToken.transfer(msg.sender, address(this), totalDept(msg.sender) - interest);
+        borrowShare.burn(msg.sender, borrowShare.balanceOf(msg.sender));
     }
 
     function withdrawPart(uint amount) public updateIndexAndLTV() {
         collateralToken.transfer(address(this), msg.sender, amount);
-        collateralShare.burn(msg.sender, collateralShare.previewWithdraw(amount));
+        collateralShare.burn(msg.sender, amount);
     }
 
     function withdrawFull() public updateIndexAndLTV() {
-        uint amount = collateralShare.maxWithdraw(msg.sender);
+        uint amount = collateralToken.balanceOf(msg.sender);
         collateralToken.transfer(address(this), msg.sender, amount);
-        collateralShare.burn(msg.sender, collateralShare.previewWithdraw(amount));
+        collateralShare.burn(msg.sender, amount);
     }
 
     function getMarket() public view returns(
         string memory,
-        uint,
-        uint,
         uint,
         uint,
         uint,
@@ -174,15 +173,13 @@ contract Market is ERC4626Upgradeable {
     ){
         return(
             title,
-            USDT_UCDC_cost,
-            USD1_USDC_cost,
-            USDC_USD_cost,
-            DAI_USDC_cost,
+            borrowPrice,
+            collateralPrice,
             LLTV,
             blocksPerYear,
             lastAccureBlock,
             currentBorrowIndex,
-            InterestRate,
+            InterestRate * 100 / precition,
             vault,
             admin,
             address(collateralToken),

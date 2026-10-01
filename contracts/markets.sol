@@ -73,10 +73,10 @@ contract Market is ERC4626Upgradeable {
 
     function LTV(address user) public view returns(uint){
         // formula : 100(%) * (borrowAmount * borrowPrice) / (collateralAmount * collateralPrice)
-        return collateralShare.balanceOf(user) == 0 
-            ? LLTV + 1 
-            : ( 100 * totalDept(user) * borrowPrice ) / 
-              ( collateralShare.balanceOf(user) * collateralPrice ); 
+        if(borrowShare.balanceOf(msg.sender) == 0) return 0;
+        if(collateralShare.balanceOf(user) == 0) return LLTV + 1;
+        return ( 100 * totalDept(user) * borrowPrice ) / 
+               ( collateralShare.balanceOf(user) * collateralPrice ); 
     }
     
     function supply(uint amount) public updateIndexAndLTV() {

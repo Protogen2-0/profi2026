@@ -61,23 +61,21 @@ export const Dashboard = () => {
                     <Col className={"column"} key={market}>
                         <h2>{market[0]}</h2>
                         <p>address: {Markets[i].address}</p>
-                        <p>USDT_UCDC_cost:     {market[1]}</p>
-                        <p>USD1_USDC_cost:     {market[2]}</p>
-                        <p>USDC_USD_cost:      {market[3]}</p>
-                        <p>DAI_USDC_cost:      {market[4]}</p>
-                        <p>LLTV:               {market[5]}</p>
-                        <p>blocksPerYear:      {market[6]}</p>
-                        <p>lastAccureBlock:    {market[7]}</p>
-                        <p>currentBorrowIndex: {market[8]}</p>
-                        <p>InterestRate:       {market[9]}</p>
-                        <p>vault:              {market[10]}</p>
-                        <p>admin:              {market[11]}</p>
-                        <p>collateralToken:    {market[12]}</p>
-                        <p>borrowToken:        {market[13]}</p>
-                        <p>collateralShare:    {market[14]}</p>
-                        <p>borrowShare:        {market[15]}</p>
-                        <p>borrowTokens:       {market[16]}</p>
-                        <p>collateralTokens:   {market[17]}</p>
+                        <p>borrowPrice:        {market[1]}</p>
+                        <p>collateralPrice:    {market[2]}</p>
+                        <p>LLTV:               {market[3]}</p>
+                        <p>blocksPerYear:      {market[4]}</p>
+                        <p>lastAccureBlock:    {market[5]}</p>
+                        <p>currentBorrowIndex: {market[6]}</p>
+                        <p>InterestRate:       {market[7]}</p>
+                        <p>vault:              {market[8]}</p>
+                        <p>admin:              {market[9]}</p>
+                        <p>collateralToken:    {market[10]}</p>
+                        <p>borrowToken:        {market[11]}</p>
+                        <p>collateralShare:    {market[12]}</p>
+                        <p>borrowShare:        {market[13]}</p>
+                        <p>borrowTokens:       {market[14]}</p>
+                        <p>collateralTokens:   {market[15]}</p>
                         <p>protocol revenue:   30% Fee     </p>
                     </Col>
                 ))}

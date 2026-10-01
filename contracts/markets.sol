@@ -148,7 +148,7 @@ contract Market is ERC4626Upgradeable {
     }
 
     function withdrawFull() public updateIndexAndLTV() {
-        uint amount = collateralToken.balanceOf(msg.sender);
+        uint amount = collateralShare.balanceOf(msg.sender);
         collateralToken.transfer(address(this), msg.sender, amount);
         collateralShare.burn(msg.sender, amount);
     }

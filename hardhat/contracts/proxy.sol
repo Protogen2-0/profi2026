@@ -6,25 +6,23 @@ import "./tokens.sol";
 
 contract MyProxy is TransparentUpgradeableProxy{
 
-    // same params order as Market
-    string public title;
-    uint public USDT_UCDC_cost;
-    uint public USD1_USDC_cost;
-    uint public USDC_USD_cost;
-    uint public DAI_USDC_cost; 
-    uint public LLTV;
-    uint public blocksPerYear;
-    uint public lastAccureBlock;
-    uint public currentBorrowIndex;
-    uint public InterestRate;
-    address public vault;
-    address public admin;
-    Token public collateralToken;
-    Token public borrowToken;
-    Share public collateralShare;
-    Share public borrowShare;
-    uint public borrowPrice;
-    uint public collateralPrice;
+    // same params order as Marketuint64 version;
+    uint64 version;
+    string title;
+    uint LLTV;
+    uint blocksPerYear;
+    uint lastAccureBlock;
+    uint currentBorrowIndex;
+    uint InterestRate;
+    address vault;
+    address admin;
+    uint borrowPrice;
+    uint collateralPrice;
+    uint WAD;
+    Token collateralToken;
+    Token borrowToken;
+    Share collateralShare;
+    Share borrowShare;
     mapping (address => uint) public userBorrowIndexAtEntry;
 
     constructor(address impl, bytes memory data) TransparentUpgradeableProxy(impl, msg.sender, data) payable {}

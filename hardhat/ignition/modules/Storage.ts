@@ -1,7 +1,7 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
 export default buildModule("ProtocolModule", (m) => {
-  // Аккаунты пользователей для первичного минта токенов (5000 каждого токена)
+  // Аккаунты для первичного минта токенов (по 5000 каждого токена)
   const admin = m.getAccount(0);
   const user1 = m.getAccount(1);
   const user2 = m.getAccount(2);
@@ -14,12 +14,14 @@ export default buildModule("ProtocolModule", (m) => {
   const usd1 = m.contract("USD1", [user1, user2, user3]);
   const dai = m.contract("DAI", [user1, user2, user3]);
 
-  // 2. Деплой Vault 1 (на базе USDC) и Vault 2 (на базе PryUSD)
-  const vaultUSDC = m.contract("Vault", [usdc, "Vault USDC"], {
+  // 2. Деплой Vault 1 и Vault 2
+  // Vault 1: Title "Vault1", базовый токен USDC, APY 10%
+  const vaultUSDC = m.contract("Vault", [usdc, "Vault1"], {
     id: "VaultUSDC",
   });
 
-  const vaultPryUSD = m.contract("Vault", [pryUsd, "Vault PryUSD"], {
+  // Vault 2: Title "Vault 2", базовый токен PryUSD, APY 10%
+  const vaultPryUSD = m.contract("Vault", [pryUsd, "Vault 2"], {
     id: "VaultPryUSD",
   });
 
@@ -28,32 +30,22 @@ export default buildModule("ProtocolModule", (m) => {
     id: "MarketImplementation",
   });
 
-  // Общие параметры инициализации маркетов:
-  // курсы (100 = 100%), начальный borrowIndex = 100, LLTV = 70%, InterestRate = 10%
-  const usdtCost = 100n;
-  const usd1Cost = 100n;
-  const usdcCost = 100n;
-  const daiCost = 100n;
-  const borrowIndex = 100n;
-  const lltv = 70n;
-  const interestRate = 10n;
+  // Общие параметры спецификации Protogen2.0
+  const currentBorrowIndex = 1_000_000_000_000_000_000n; // 1 * 1e18
   const version = 1n;
 
-  // 4. Инициализация и деплой Proxy для Маркета 1 (залог: USDT, заём: USDC)
+  // 4. Инициализация и деплой Proxy для Market1 (залог: USDT, заём: USDC)
+  // Title: "Market1", LLTV: 75%, InterestRate: 317 * 1e8
   const initDataMarket1 = m.encodeFunctionCall(
     marketImpl,
     "init",
     [
-      usdtCost,
-      usd1Cost,
-      usdcCost,
-      daiCost,
-      borrowIndex,
-      "Market USDT/USDC",
-      lltv,
+      currentBorrowIndex,
+      "Market1",
+      75n, // 75%
       vaultUSDC,
       admin,
-      interestRate,
+      317n, // 317 (* 1e8 inside init)
       usdt,
       usdc,
       version,
@@ -65,21 +57,18 @@ export default buildModule("ProtocolModule", (m) => {
     id: "ProxyMarketUSDT",
   });
 
-  // 5. Инициализация и деплой Proxy для Маркета 2 (залог: USD1, заём: USDC)
+  // 5. Инициализация и деплой Proxy для Market2 (залог: USD1, заём: USDC)
+  // Title: "Market2", LLTV: 80%, InterestRate: 500 * 1e8
   const initDataMarket2 = m.encodeFunctionCall(
     marketImpl,
     "init",
     [
-      usdtCost,
-      usd1Cost,
-      usdcCost,
-      daiCost,
-      borrowIndex,
-      "Market USD1/USDC",
-      lltv,
+      currentBorrowIndex,
+      "Market2",
+      80n, // 80%
       vaultUSDC,
       admin,
-      interestRate,
+      500n, // 500 (* 1e8 inside init)
       usd1,
       usdc,
       version,
@@ -91,21 +80,18 @@ export default buildModule("ProtocolModule", (m) => {
     id: "ProxyMarketUSD1",
   });
 
-  // 6. Инициализация и деплой Proxy для Маркета 3 (залог: DAI, заём: USDC)
+  // 6. Инициализация и деплой Proxy для Market3 (залог: DAI, заём: USDC)
+  // Title: "Market3", LLTV: 85%, InterestRate: 350 * 1e8
   const initDataMarket3 = m.encodeFunctionCall(
     marketImpl,
     "init",
     [
-      usdtCost,
-      usd1Cost,
-      usdcCost,
-      daiCost,
-      borrowIndex,
-      "Market DAI/USDC",
-      lltv,
+      currentBorrowIndex,
+      "Market3",
+      85n, // 85%
       vaultUSDC,
       admin,
-      interestRate,
+      350n, // 350 (* 1e8 inside init)
       dai,
       usdc,
       version,
@@ -117,7 +103,7 @@ export default buildModule("ProtocolModule", (m) => {
     id: "ProxyMarketDAI",
   });
 
-  // 7. Распределение первичной ликвидности из Vault USDC по трем маркетам
+  // 7. Распределение первичной ликвидности из Vault 1 (USDC) по трем маркетам
   m.call(
     vaultUSDC,
     "destributeToMarkets",

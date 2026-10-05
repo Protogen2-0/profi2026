@@ -10,14 +10,22 @@ plugins: [hardhatToolboxMochaEthersPlugin],
     profiles: {
       default: {
         version: "0.8.34",
+        settings:{
+          optimizer: {
+            enabled: true,
+            runs: 100,
+          },
+          viaIR:true,
+        },
       },
       production: {
         version: "0.8.34",
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: 100,
           },
+          viaIR:true,
         },
       },
     },
@@ -40,7 +48,7 @@ plugins: [hardhatToolboxMochaEthersPlugin],
     geth: {
       type: "http",
       url: "http://127.0.0.1:8545",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      accounts: "remote",
     },
   },
   ignition: {

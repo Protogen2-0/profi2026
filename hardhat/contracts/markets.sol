@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./vault.sol";
+import "./vaults.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol";
 
 contract Market is ERC4626Upgradeable {
+
+    uint64 version;
 
     string title;
 
@@ -22,7 +24,6 @@ contract Market is ERC4626Upgradeable {
     uint collateralPrice; // %
 
     uint WAD;
-    uint precition;
 
     Token collateralToken;
     Token borrowToken;
@@ -33,31 +34,30 @@ contract Market is ERC4626Upgradeable {
 
     // constructor()
     function init(
-        uint borrowIndex,   string memory title_,   uint LLTV_,         address vault_,  address admin_, 
-        uint InterestRate_, Token collateralToken_, Token borrowToken_, uint64 version
-    ) public reinitializer(version) {
+        string memory title_,   uint LLTV_,        address vault_,
+        uint InterestRate_, Token collateralToken_, Token borrowToken_
+    ) public reinitializer(++version) {
         __ERC4626_init(IERC20(collateralToken_));
         __ERC20_init(collateralToken_.name(), collateralToken_.symbol());
         title = title_;
         LLTV = LLTV_;
         blocksPerYear = 2102400;
         lastAccureBlock = block.number;
-        currentBorrowIndex = currentBorrowIndex == 0 ? 1e18 : borrowIndex;
+        currentBorrowIndex = currentBorrowIndex == 0 ? 1e18 : currentBorrowIndex;
         InterestRate = InterestRate_ * 1e8;
         vault = vault_;
-        admin = admin_;
+        admin = Vault(vault).owner();
         borrowPrice = 100;
         collateralPrice = 100;
         WAD = 1e18;
-        precition = 1e12;
         collateralToken = collateralToken_;
         borrowToken     = borrowToken_;
-        collateralShare = new Share(address(collateralToken_), collateralToken_.name(), collateralToken_.symbol(), collateralToken_.decimals());
-        borrowShare     = new Share(address(borrowToken_),     borrowToken_.name(),     borrowToken_.symbol(),     borrowToken_.decimals()    );
+        collateralShare = new Share(address(collateralToken), collateralToken.name(), collateralToken.symbol(), collateralToken.decimals());
+        borrowShare     = new Share(address(borrowToken),     borrowToken.name(),     borrowToken.symbol(),     borrowToken.decimals()    );
     }
 
     modifier updateIndexAndLTV() {
-        currentBorrowIndex += currentBorrowIndex * InterestRate * (block.number - lastAccureBlock) / (blocksPerYear * precition);
+        currentBorrowIndex += currentBorrowIndex * InterestRate * (block.number - lastAccureBlock) / (blocksPerYear * 1e12); //1e12 is precision
         lastAccureBlock = block.number;
         _;
         require(LTV(msg.sender) <= LLTV, "LTV is larger than LLTV");
@@ -167,7 +167,6 @@ contract Market is ERC4626Upgradeable {
         address,
         address,
         address,
-        address,
         uint,
         uint
     ){
@@ -179,9 +178,8 @@ contract Market is ERC4626Upgradeable {
             blocksPerYear,
             lastAccureBlock,
             currentBorrowIndex,
-            InterestRate * 100 / precition,
+            InterestRate * 100 / 1e12, //1e12 is precision
             vault,
-            admin,
             address(collateralToken),
             address(borrowToken),
             address(collateralShare),

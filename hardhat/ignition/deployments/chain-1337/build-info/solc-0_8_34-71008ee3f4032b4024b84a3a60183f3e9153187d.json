@@ -1,6 +1,6 @@
 {
   "_format": "hh3-sol-build-info-1",
-  "id": "solc-0_8_34-88f246de616b60c544148795c541ac3b0085c9c1",
+  "id": "solc-0_8_34-71008ee3f4032b4024b84a3a60183f3e9153187d",
   "solcVersion": "0.8.34",
   "solcLongVersion": "0.8.34+commit.80d5c536",
   "compilerType": "solc",
@@ -8,7 +8,7 @@
     "hardhat": "3.18.0"
   },
   "userSourceNameMap": {
-    "contracts/vault.sol": "project/contracts/vault.sol"
+    "contracts/tokens.sol": "project/contracts/tokens.sol"
   },
   "input": {
     "language": "Solidity",
@@ -16,7 +16,7 @@
       "evmVersion": "osaka",
       "optimizer": {
         "enabled": true,
-        "runs": 200
+        "runs": 100
       },
       "outputSelection": {
         "*": {
@@ -97,9 +97,6 @@
       },
       "project/contracts/tokens.sol": {
         "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.0;\r\n\r\nimport \"@openzeppelin/contracts/token/ERC20/ERC20.sol\";\r\n\r\ncontract Token is ERC20{\r\n    uint8 immutable _decimals;\r\n\r\n    constructor(string memory name, string memory symbol, uint8 decimals_, address address1, address address2, address address3) ERC20(name, symbol){\r\n        _decimals = decimals_;\r\n        _mint(address1, 5000 * 10 ** _decimals);\r\n        _mint(address2, 5000 * 10 ** _decimals);\r\n        _mint(address3, 5000 * 10 ** _decimals);\r\n    }\r\n\r\n    function decimals() public view override returns(uint8){\r\n        return _decimals;\r\n    }\r\n\r\n    function mint(address account, uint amount) public {\r\n        super._mint(account, amount);\r\n    }\r\n\r\n    function burn(address account, uint amount) public {\r\n        super._burn(account, amount);\r\n    }\r\n\r\n    function transfer(address from, address to, uint amount) public{\r\n        super._transfer(from, to, amount);\r\n    }\r\n}\r\n\r\ncontract USDC is Token{\r\n    constructor(address address1, address address2, address address3) Token(\"USDC\", \"USDC\", 18, address1, address2, address3){}\r\n}\r\n\r\ncontract PryUSD is Token{\r\n    constructor(address address1, address address2, address address3) Token(\"PryUSD\", \"PryUSD\", 18, address1, address2, address3){}\r\n}\r\n\r\ncontract USD1 is Token{\r\n    constructor(address address1, address address2, address address3) Token(\"USD1\", \"USD1\", 18, address1, address2, address3){}\r\n}\r\n\r\ncontract USD is Token{\r\n    constructor(address address1, address address2, address address3) Token(\"USD\", \"USD\", 18, address1, address2, address3){}\r\n}\r\n\r\ncontract USDT is Token{\r\n    constructor(address address1, address address2, address address3) Token(\"USDT\", \"USDT\", 18, address1, address2, address3){}\r\n}\r\n\r\ncontract UCDC is Token{\r\n    constructor(address address1, address address2, address address3) Token(\"UCDC\", \"UCDC\", 18, address1, address2, address3){}\r\n}\r\n\r\ncontract DAI is Token{\r\n    constructor(address address1, address address2, address address3) Token(\"DAI\", \"DAI\", 18, address1, address2, address3){}\r\n}\r\n\r\n//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////\r\n\r\nimport \"@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol\";\r\n\r\ncontract Share is ERC4626{\r\n    uint8 immutable _decimals;\r\n\r\n    constructor(address asset, string memory name, string memory symbol, uint8 decimals_) ERC4626(IERC20(asset)) ERC20(name, symbol){\r\n        _decimals = decimals_;\r\n    }\r\n\r\n    function decimals() public view override returns(uint8){\r\n        return _decimals;\r\n    }\r\n\r\n    function burn(address account, uint amount) public {\r\n        super._burn(account, amount);\r\n    }\r\n\r\n    function mint(address account, uint amount) public {\r\n        super._mint(account, amount);\r\n    }\r\n}"
-      },
-      "project/contracts/vault.sol": {
-        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.0;\r\n\r\nimport \"./tokens.sol\";\r\n\r\ncontract Vault is ERC4626 {\r\n\r\n    Token assetToken;\r\n    uint8 APY; // 10% instead of 0.1\r\n    string title;\r\n    uint assets;\r\n\r\n    constructor(Token assetToken_, string memory title_) ERC4626(IERC20(assetToken_)) ERC20(assetToken_.name(), assetToken_.symbol()) {\r\n        title = title_;\r\n        assetToken = assetToken_;\r\n        assetToken.mint(address(this), 10000 * 10 ** assetToken.decimals());\r\n        APY = 10;\r\n    }\r\n\r\n    function totalAssets() public view override returns(uint){\r\n        return assets;\r\n    }\r\n\r\n    function destributeToMarkets(address proxyMarket1, address proxyMarket2, address proxyMarket3) public { //distribute\r\n        uint transferAmount = assetToken.balanceOf(address(this)) / 6;\r\n        assetToken.transfer(address(this), proxyMarket1, transferAmount);\r\n        assetToken.transfer(address(this), proxyMarket2, transferAmount);\r\n        assetToken.transfer(address(this), proxyMarket3, transferAmount);\r\n    }\r\n\r\n    function deposit(uint amount) public {\r\n        if(amount < 10 * 10 ** assetToken.decimals()){ // 10 * 10 ** decimals = minimal deposit (10 asset tokens)\r\n            revert(\"minimal deposit is 10 asset tokens\");\r\n        }\r\n        assetToken.transfer(msg.sender, address(this), amount);\r\n        _mint(msg.sender, previewDeposit(amount));\r\n        assets += amount;\r\n    }\r\n\r\n    function withdrawPart(uint amount) public {\r\n        if(amount > assets){\r\n            revert(\"number of available assets is lower then requested amount\");\r\n        }\r\n        uint shares = previewWithdraw(amount);\r\n        if(shares > balanceOf(msg.sender)){\r\n            revert(\"user is withdrawing more than he deposited\");\r\n        }\r\n        assetToken.transfer(address(this), msg.sender, amount);\r\n        _burn(msg.sender, shares);\r\n        assets -= amount;\r\n    }\r\n\r\n    function withdrawFull() public {\r\n        uint shares = balanceOf(msg.sender);\r\n        uint userAssets = previewRedeem(shares);\r\n        if(userAssets > assets){\r\n            revert(\"number of available assets is lower then requested amount\");\r\n        }\r\n        assetToken.transfer(address(this), msg.sender, userAssets);\r\n        _burn(msg.sender, shares);\r\n        assets -= userAssets;\r\n    }\r\n\r\n    function increaseAssets(uint amount) public {\r\n        assets += amount;\r\n    }\r\n\r\n    function getVault() public view returns(address, uint, string memory, uint, uint, uint){\r\n        return(address(assetToken), APY, title, assets, totalSupply(), assetToken.balanceOf(address(this)));\r\n    }\r\n    \r\n    function getUserVault()  public view returns(uint, uint){\r\n        return(assetToken.balanceOf(msg.sender), balanceOf(msg.sender));\r\n    }\r\n}"
       }
     }
   }

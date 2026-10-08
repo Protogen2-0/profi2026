@@ -23,7 +23,7 @@ contract Vault is ERC4626 {
         return assets;
     }
 
-    function destributeToMarkets(address proxyMarket1, address proxyMarket2, address proxyMarket3) public { //distribute
+    function destributeToMarkets(address proxyMarket1, address proxyMarket2, address proxyMarket3) public {
         uint transferAmount = assetToken.balanceOf(address(this)) / 6;
         assetToken.transfer(address(this), proxyMarket1, transferAmount);
         assetToken.transfer(address(this), proxyMarket2, transferAmount);
@@ -31,22 +31,19 @@ contract Vault is ERC4626 {
     }
 
     function deposit(uint amount) public {
-        if(amount < 10 * 10 ** assetToken.decimals()){ // 10 * 10 ** decimals = minimal deposit (10 asset tokens)
+        if(amount < 10 * 10 ** assetToken.decimals()) // minimal deposit 10 asset tokens
             revert("minimal deposit is 10 asset tokens");
-        }
         assetToken.transfer(msg.sender, address(this), amount);
         _mint(msg.sender, previewDeposit(amount));
         assets += amount;
     }
 
     function withdrawPart(uint amount) public {
-        if(amount > assets){
+        if(amount > assets)
             revert("number of available assets is lower then requested amount");
-        }
         uint shares = previewWithdraw(amount);
-        if(shares > balanceOf(msg.sender)){
+        if(shares > balanceOf(msg.sender))
             revert("user is withdrawing more than he deposited");
-        }
         assetToken.transfer(address(this), msg.sender, amount);
         _burn(msg.sender, shares);
         assets -= amount;
@@ -55,9 +52,8 @@ contract Vault is ERC4626 {
     function withdrawFull() public {
         uint shares = balanceOf(msg.sender);
         uint userAssets = previewRedeem(shares);
-        if(userAssets > assets){
+        if(userAssets > assets)
             revert("number of available assets is lower then requested amount");
-        }
         assetToken.transfer(address(this), msg.sender, userAssets);
         _burn(msg.sender, shares);
         assets -= userAssets;
@@ -71,7 +67,7 @@ contract Vault is ERC4626 {
         return(address(assetToken), APY, title, assets, totalSupply(), assetToken.balanceOf(address(this)));
     }
     
-    function getUserVault()  public view returns(uint, uint){
+    function getUserVault() public view returns(uint, uint){
         return(assetToken.balanceOf(msg.sender), balanceOf(msg.sender));
     }
 }

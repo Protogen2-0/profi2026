@@ -597,11 +597,6 @@
         "type": "address"
       },
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
@@ -656,11 +651,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "borrowIndex",
-        "type": "uint256"
-      },
-      {
         "internalType": "string",
         "name": "title_",
         "type": "string"
@@ -673,11 +663,6 @@
       {
         "internalType": "address",
         "name": "vault_",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "admin_",
         "type": "address"
       },
       {
@@ -694,14 +679,22 @@
         "internalType": "contract Token",
         "name": "borrowToken_",
         "type": "address"
-      },
-      {
-        "internalType": "uint64",
-        "name": "version",
-        "type": "uint64"
       }
     ],
     "name": "init",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "liquidate",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

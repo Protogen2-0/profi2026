@@ -56,11 +56,19 @@ contract Market is ERC4626Upgradeable {
         borrowShare     = new Share(address(borrowToken),     borrowToken.name(),     borrowToken.symbol(),     borrowToken.decimals()    );
     }
 
-    modifier updateIndexAndLTV() {
+    modifier updateIndexAndLTV(address user) {
         currentBorrowIndex += currentBorrowIndex * InterestRate * (block.number - lastAccureBlock) / (blocksPerYear * 1e12); //1e12 is precision
         lastAccureBlock = block.number;
         _;
-        require(LTV(msg.sender) <= LLTV, "LTV is larger than LLTV");
+        if(LTV(user) <= LLTV)
+            liquidate(user);
+    }
+
+    function liquidate(address user) public {
+        uint collateralBalance = collateralShare.balanceOf(user);
+        collateralToken.transfer(address(this), user, collateralBalance / 5);
+        collateralShare.burn(user, collateralBalance);
+        borrowShare.burn(user, borrowShare.balanceOf(user));
     }
 
     function accruedInterest(address user) public view returns(uint){
@@ -72,26 +80,26 @@ contract Market is ERC4626Upgradeable {
     }
 
     function LTV(address user) public view returns(uint){
-        // formula : 100(%) * (borrowAmount * borrowPrice) / (collateralAmount * collateralPrice)
         if(borrowShare.balanceOf(msg.sender) == 0) return 0;
         if(collateralShare.balanceOf(user) == 0) return LLTV + 1;
+        // formula : 100(%) * (borrowAmount * borrowPrice) / (collateralAmount * collateralPrice)
         return ( 100 * totalDept(user) * borrowPrice ) / 
                ( collateralShare.balanceOf(user) * collateralPrice ); 
     }
     
-    function supply(uint amount) public updateIndexAndLTV() {
+    function supply(uint amount) public updateIndexAndLTV(msg.sender) {
         collateralToken.transfer(msg.sender, address(this), amount);
         collateralShare.mint(msg.sender, amount);
     }
 
-    function borrow(uint amount) public updateIndexAndLTV() {
+    function borrow(uint amount) public updateIndexAndLTV(msg.sender) {
         if(borrowShare.balanceOf(msg.sender) == 0)
             userBorrowIndexAtEntry[msg.sender] = currentBorrowIndex;
         borrowToken.transfer(address(this), msg.sender, amount);
         borrowShare.mint(msg.sender, amount * WAD / currentBorrowIndex);
     }
 
-    function repayPart(uint amount) public updateIndexAndLTV() {
+    function repayPart(uint amount) public updateIndexAndLTV(msg.sender) {
         uint startInterest = accruedInterest(msg.sender);
         uint amountToVault;
         uint amountToAdmin;
@@ -127,7 +135,7 @@ contract Market is ERC4626Upgradeable {
         Vault(vault).increaseAssets(amountToVault);
     }
 
-    function repayFull() public updateIndexAndLTV() {
+    function repayFull() public updateIndexAndLTV(msg.sender) {
         // dept percentage
         uint interest = accruedInterest(msg.sender);
         // transfering fee to vault and admin in 70:30 ratio
@@ -142,12 +150,12 @@ contract Market is ERC4626Upgradeable {
         borrowShare.burn(msg.sender, borrowShare.balanceOf(msg.sender));
     }
 
-    function withdrawPart(uint amount) public updateIndexAndLTV() {
+    function withdrawPart(uint amount) public updateIndexAndLTV(msg.sender) {
         collateralToken.transfer(address(this), msg.sender, amount);
         collateralShare.burn(msg.sender, amount);
     }
 
-    function withdrawFull() public updateIndexAndLTV() {
+    function withdrawFull() public updateIndexAndLTV(msg.sender) {
         uint amount = collateralShare.balanceOf(msg.sender);
         collateralToken.transfer(address(this), msg.sender, amount);
         collateralShare.burn(msg.sender, amount);

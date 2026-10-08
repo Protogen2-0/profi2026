@@ -2,17 +2,16 @@ import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
 export default buildModule("ProtocolModule", (m) => {
   // Аккаунты для первичного минта токенов (по 5000 каждого токена)
-  const admin = m.getAccount(0);
   const user1 = m.getAccount(1);
   const user2 = m.getAccount(2);
   const user3 = m.getAccount(3);
 
   // 1. Деплой токенов
-  const usdc = m.contract("USDC", [user1, user2, user3]);
+  const usdc   = m.contract("USDC",   [user1, user2, user3]);
   const pryUsd = m.contract("PryUSD", [user1, user2, user3]);
-  const usdt = m.contract("USDT", [user1, user2, user3]);
-  const usd1 = m.contract("USD1", [user1, user2, user3]);
-  const dai = m.contract("DAI", [user1, user2, user3]);
+  const usdt   = m.contract("USDT",   [user1, user2, user3]);
+  const usd1   = m.contract("USD1",   [user1, user2, user3]);
+  const dai    = m.contract("DAI",    [user1, user2, user3]);
 
   // 2. Деплой Vault 1 и Vault 2
   // Vault 1: Title "Vault1", базовый токен USDC, APY 10%
@@ -30,25 +29,18 @@ export default buildModule("ProtocolModule", (m) => {
     id: "MarketImplementation",
   });
 
-  // Общие параметры спецификации Protogen2.0
-  const currentBorrowIndex = 1_000_000_000_000_000_000n; // 1 * 1e18
-  const version = 1n;
-
   // 4. Инициализация и деплой Proxy для Market1 (залог: USDT, заём: USDC)
   // Title: "Market1", LLTV: 75%, InterestRate: 317 * 1e8
   const initDataMarket1 = m.encodeFunctionCall(
     marketImpl,
     "init",
     [
-      currentBorrowIndex,
       "Market1",
       75n, // 75%
       vaultUSDC,
-      admin,
       317n, // 317 (* 1e8 inside init)
       usdt,
       usdc,
-      version,
     ],
     { id: "EncodeInitMarket1" }
   );
@@ -63,15 +55,12 @@ export default buildModule("ProtocolModule", (m) => {
     marketImpl,
     "init",
     [
-      currentBorrowIndex,
       "Market2",
       80n, // 80%
       vaultUSDC,
-      admin,
       500n, // 500 (* 1e8 inside init)
       usd1,
       usdc,
-      version,
     ],
     { id: "EncodeInitMarket2" }
   );
@@ -86,15 +75,12 @@ export default buildModule("ProtocolModule", (m) => {
     marketImpl,
     "init",
     [
-      currentBorrowIndex,
       "Market3",
       85n, // 85%
       vaultUSDC,
-      admin,
       350n, // 350 (* 1e8 inside init)
       dai,
       usdc,
-      version,
     ],
     { id: "EncodeInitMarket3" }
   );

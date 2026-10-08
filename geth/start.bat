@@ -1,1 +1,0 @@
-geth --dev --datadir "./" --http --http.addr "127.0.0.1" --http.port 8545 --http.api="eth,web3,net,personal,txpool" --http.corsdomain "*" console

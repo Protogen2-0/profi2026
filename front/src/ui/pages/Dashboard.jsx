@@ -69,13 +69,12 @@ export const Dashboard = () => {
                         <p>currentBorrowIndex: {market[6]}</p>
                         <p>InterestRate:       {market[7]}</p>
                         <p>vault:              {market[8]}</p>
-                        <p>admin:              {market[9]}</p>
-                        <p>collateralToken:    {market[10]}</p>
-                        <p>borrowToken:        {market[11]}</p>
-                        <p>collateralShare:    {market[12]}</p>
-                        <p>borrowShare:        {market[13]}</p>
-                        <p>borrowTokens:       {market[14]}</p>
-                        <p>collateralTokens:   {market[15]}</p>
+                        <p>collateralToken:    {market[9]}</p>
+                        <p>borrowToken:        {market[10]}</p>
+                        <p>collateralShare:    {market[11]}</p>
+                        <p>borrowShare:        {market[12]}</p>
+                        <p>borrowTokens:       {market[13]}</p>
+                        <p>collateralTokens:   {market[14]}</p>
                         <p>protocol revenue:   30% Fee     </p>
                     </Col>
                 ))}

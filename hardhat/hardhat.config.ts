@@ -51,7 +51,4 @@ plugins: [hardhatToolboxMochaEthersPlugin],
       accounts: "remote",
     },
   },
-  ignition: {
-    requiredConfirmations: 1,
-  },
 });

@@ -27,25 +27,6 @@ contract MyProxy is TransparentUpgradeableProxy{
 
     constructor(address impl, bytes memory data) TransparentUpgradeableProxy(impl, msg.sender, data) payable {}
 
-    function getProxyAdmin() public view returns(address){
-        return super._proxyAdmin();
-    }
+    receive() external payable {}
 
-    function getProxyImplementation() public view returns(address){
-        return super._implementation();
-    }
-
-    function callOtherMethodBytes(bytes memory methodData) public returns(bytes memory){
-        (bool success, bytes memory returnData) = getProxyImplementation().delegatecall(methodData); 
-        require(success, "error while calling method (bytes)");
-        return returnData;
-    }
-
-    function callOtherMethodString(string memory funcSig) public returns(bytes memory){
-        (bool success, bytes memory returnData) = getProxyImplementation().delegatecall(abi.encodeWithSignature(funcSig)); 
-        require(success, "error while calling method (string)");
-        return returnData;
-    }
-
-    receive() external payable{}
 }

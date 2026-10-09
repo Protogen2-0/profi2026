@@ -20,14 +20,14 @@ contract MarketTest is Test {
     Vault vault1;
 
     function createMarket(
-        string memory title, uint LLTV, uint interestRate
+        string memory title, uint LLTV, uint interestRate, uint borrowPrice, uint collateralPrice, uint adminFee, uint64 version
     ) public returns(Market){
         return Market(
             address(new MyProxy(
                 address(new Market()), 
                 abi.encodeCall(
                     Market.init, 
-                    (title, LLTV, address(vault1), interestRate, ucdc, usdc)
+                    (title, LLTV, address(vault1), borrowPrice, collateralPrice, adminFee, interestRate, ucdc, usdc, version)
                 )
             ))
         );
@@ -45,9 +45,9 @@ contract MarketTest is Test {
         pryusd  = new PryUSD(adr1, adr2, adr3);
         ucdc    = new UCDC  (adr1, adr2, adr3);
         vault1  = new Vault (usdc, "Vault1");
-        market1 = createMarket("Market1", 75, 317);
-        market2 = createMarket("Market2", 80, 500);
-        market3 = createMarket("Market3", 85, 350);
+        market1 = createMarket("Market1", 75, 317, 100, 100, 30, 1);
+        market2 = createMarket("Market2", 80, 500, 100, 100, 30, 1);
+        market3 = createMarket("Market3", 85, 350, 100, 100, 30, 1);
         vault1.destributeToMarkets(address(market1), address(market2), address(market3));
     }
 

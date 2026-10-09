@@ -38,9 +38,13 @@ export default buildModule("ProtocolModule", (m) => {
       "Market1",
       75n, // 75%
       vaultUSDC,
+      100,
+      100,
+      30,
       317n, // 317 (* 1e8 inside init)
       usdt,
       usdc,
+      1,
     ],
     { id: "EncodeInitMarket1" }
   );
@@ -58,9 +62,13 @@ export default buildModule("ProtocolModule", (m) => {
       "Market2",
       80n, // 80%
       vaultUSDC,
+      100,
+      100,
+      30,
       500n, // 500 (* 1e8 inside init)
       usd1,
       usdc,
+      1,
     ],
     { id: "EncodeInitMarket2" }
   );
@@ -78,9 +86,13 @@ export default buildModule("ProtocolModule", (m) => {
       "Market3",
       85n, // 85%
       vaultUSDC,
+      100,
+      100,
+      30,
       350n, // 350 (* 1e8 inside init)
       dai,
       usdc,
+      1,
     ],
     { id: "EncodeInitMarket3" }
   );

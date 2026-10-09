@@ -597,6 +597,11 @@
         "type": "address"
       },
       {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
@@ -667,6 +672,21 @@
       },
       {
         "internalType": "uint256",
+        "name": "borrowPrice_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "collateralPrice_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "adminFee_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
         "name": "InterestRate_",
         "type": "uint256"
       },
@@ -679,6 +699,11 @@
         "internalType": "contract Token",
         "name": "borrowToken_",
         "type": "address"
+      },
+      {
+        "internalType": "uint64",
+        "name": "version",
+        "type": "uint64"
       }
     ],
     "name": "init",

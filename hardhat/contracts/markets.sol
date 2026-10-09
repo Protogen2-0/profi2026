@@ -6,8 +6,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgrad
 
 contract Market is ERC4626Upgradeable {
 
-    uint64 version;
-
     string title;
 
     uint LLTV;
@@ -19,11 +17,11 @@ contract Market is ERC4626Upgradeable {
     address vault; // address which will receive 70% from fee 
     address admin; // address which will receive 30% from fee
 
-    // calculating in % (e.g. 70% LLTV = 70)
-    uint borrowPrice; // %
-    uint collateralPrice; // %
+    uint vaultFee;
+    uint adminFee;
 
-    uint WAD;
+    uint borrowPrice;
+    uint collateralPrice;
 
     Token collateralToken;
     Token borrowToken;
@@ -34,9 +32,9 @@ contract Market is ERC4626Upgradeable {
 
     // constructor()
     function init(
-        string memory title_,   uint LLTV_,        address vault_,
-        uint InterestRate_, Token collateralToken_, Token borrowToken_
-    ) public reinitializer(++version) {
+        string memory title_, uint LLTV_, address vault_, uint borrowPrice_, uint collateralPrice_,
+        uint adminFee_, uint InterestRate_, Token collateralToken_, Token borrowToken_, uint64 version
+    ) public reinitializer(version) {
         __ERC4626_init(IERC20(collateralToken_));
         __ERC20_init(collateralToken_.name(), collateralToken_.symbol());
         title = title_;
@@ -47,9 +45,10 @@ contract Market is ERC4626Upgradeable {
         InterestRate = InterestRate_ * 1e8;
         vault = vault_;
         admin = Vault(vault).owner();
-        borrowPrice = 100;
-        collateralPrice = 100;
-        WAD = 1e18;
+        adminFee = adminFee_;
+        vaultFee = 100 - adminFee;
+        borrowPrice = borrowPrice_;
+        collateralPrice = collateralPrice_;
         collateralToken = collateralToken_;
         borrowToken     = borrowToken_;
         collateralShare = new Share(address(collateralToken), collateralToken.name(), collateralToken.symbol(), collateralToken.decimals());
@@ -60,7 +59,7 @@ contract Market is ERC4626Upgradeable {
         currentBorrowIndex += currentBorrowIndex * InterestRate * (block.number - lastAccureBlock) / (blocksPerYear * 1e12); //1e12 is precision
         lastAccureBlock = block.number;
         _;
-        if(LTV(user) <= LLTV)
+        if(LTV(user) > LLTV)
             liquidate(user);
     }
 
@@ -72,15 +71,15 @@ contract Market is ERC4626Upgradeable {
     }
 
     function accruedInterest(address user) public view returns(uint){
-        return borrowShare.balanceOf(user) * (currentBorrowIndex - userBorrowIndexAtEntry[user]) / WAD;
+        return borrowShare.balanceOf(user) * (currentBorrowIndex - userBorrowIndexAtEntry[user]) / 1e18;  // 1e18 is WAD
     }
 
     function totalDept(address user) public view returns(uint){
-        return borrowShare.balanceOf(user) * currentBorrowIndex / WAD;
+        return borrowShare.balanceOf(user) * currentBorrowIndex / 1e18; // 1e18 is WAD
     }
 
     function LTV(address user) public view returns(uint){
-        if(borrowShare.balanceOf(msg.sender) == 0) return 0;
+        if(borrowShare.balanceOf(user) == 0) return 0;
         if(collateralShare.balanceOf(user) == 0) return LLTV + 1;
         // formula : 100(%) * (borrowAmount * borrowPrice) / (collateralAmount * collateralPrice)
         return ( 100 * totalDept(user) * borrowPrice ) / 
@@ -96,7 +95,7 @@ contract Market is ERC4626Upgradeable {
         if(borrowShare.balanceOf(msg.sender) == 0)
             userBorrowIndexAtEntry[msg.sender] = currentBorrowIndex;
         borrowToken.transfer(address(this), msg.sender, amount);
-        borrowShare.mint(msg.sender, amount * WAD / currentBorrowIndex);
+        borrowShare.mint(msg.sender, amount * 1e18 / currentBorrowIndex);  // 1e18 is WAD
     }
 
     function repayPart(uint amount) public updateIndexAndLTV(msg.sender) {
@@ -126,7 +125,7 @@ contract Market is ERC4626Upgradeable {
             uint payment = amount - startInterest;
             // transfering tokens to market and burning shares to reduce dept
             borrowToken.transfer(msg.sender, address(this), payment);
-            borrowShare.burn(msg.sender, payment * WAD / currentBorrowIndex);
+            borrowShare.burn(msg.sender, payment * 1e18 / currentBorrowIndex); // 1e18 is WAD
         }
         // transfering fee to vault and admin in 70:30 ratio
         borrowToken.transfer(msg.sender, vault, amountToVault);
@@ -175,6 +174,7 @@ contract Market is ERC4626Upgradeable {
         address,
         address,
         address,
+        address,
         uint,
         uint
     ){
@@ -183,11 +183,12 @@ contract Market is ERC4626Upgradeable {
             borrowPrice,
             collateralPrice,
             LLTV,
-            blocksPerYear,
+            adminFee,
             lastAccureBlock,
             currentBorrowIndex,
             InterestRate * 100 / 1e12, //1e12 is precision
             vault,
+            admin,
             address(collateralToken),
             address(borrowToken),
             address(collateralShare),

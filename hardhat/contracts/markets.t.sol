@@ -20,14 +20,15 @@ contract MarketTest is Test {
     Vault vault1;
 
     function createMarket(
-        string memory title, uint LLTV, uint interestRate, uint borrowPrice, uint collateralPrice, uint adminFee, uint64 version
+        string memory title, string memory colShareName, string memory borShareName, uint LLTV, 
+        uint interestRate, uint borrowPrice, uint collateralPrice, uint adminFee, uint64 version
     ) public returns(Market){
         return Market(
             address(new MyProxy(
                 address(new Market()), 
                 abi.encodeCall(
                     Market.init, 
-                    (title, LLTV, address(vault1), borrowPrice, collateralPrice, adminFee, interestRate, ucdc, usdc, version)
+                    (title, colShareName, borShareName, LLTV, address(vault1), borrowPrice, collateralPrice, adminFee, interestRate, ucdc, usdc, version)
                 )
             ))
         );
@@ -44,10 +45,10 @@ contract MarketTest is Test {
         usdc    = new USDC  (adr1, adr2, adr3);
         pryusd  = new PryUSD(adr1, adr2, adr3);
         ucdc    = new UCDC  (adr1, adr2, adr3);
-        vault1  = new Vault (usdc, "Vault1");
-        market1 = createMarket("Market1", 75, 317, 100, 100, 30, 1);
-        market2 = createMarket("Market2", 80, 500, 100, 100, 30, 1);
-        market3 = createMarket("Market3", 85, 350, 100, 100, 30, 1);
+        vault1  = new Vault (usdc, "Vault1", "profiUSDC1");
+        market1 = createMarket("Market1", "shareMarket1", "borrowShareMarket1", 75, 317, 100, 100, 30, 1);
+        market2 = createMarket("Market2", "shareMarket2", "borrowShareMarket2", 80, 500, 100, 100, 30, 1);
+        market3 = createMarket("Market3", "shareMarket3", "borrowShareMarket3", 85, 350, 100, 100, 30, 1);
         vault1.destributeToMarkets(address(market1), address(market2), address(market3));
     }
 
@@ -76,9 +77,9 @@ contract MarketTest is Test {
     // test group 2: checking that users/markets dont have tokens that are not supposed to be at the start
 
     function test_sharesInMarketsHaveCorrectAssets() public view {
-        (,,,,,,,,,,, address collateralShare1, address borrowShare1,,) = market1.getMarket();
-        (,,,,,,,,,,, address collateralShare2, address borrowShare2,,) = market2.getMarket();
-        (,,,,,,,,,,, address collateralShare3, address borrowShare3,,) = market3.getMarket();
+        (,,,,,,,,,,,, address collateralShare1, address borrowShare1,,) = market1.getMarket();
+        (,,,,,,,,,,,, address collateralShare2, address borrowShare2,,) = market2.getMarket();
+        (,,,,,,,,,,,, address collateralShare3, address borrowShare3,,) = market3.getMarket();
 
         // all collateral shares are supposed to have ucdc as asset token
         assertEq(Share(collateralShare1).asset(), address(ucdc), "market1 was supposed to have colShare asset as coltoken");
@@ -92,9 +93,9 @@ contract MarketTest is Test {
     }
 
     function test_marketsGetNotEqShares() public view {
-        (,,,,,,,,,,, address collateralShare1, address borrowShare1,,) = market1.getMarket();
-        (,,,,,,,,,,, address collateralShare2, address borrowShare2,,) = market2.getMarket();
-        (,,,,,,,,,,, address collateralShare3, address borrowShare3,,) = market3.getMarket();
+        (,,,,,,,,,,,, address collateralShare1, address borrowShare1,,) = market1.getMarket();
+        (,,,,,,,,,,,, address collateralShare2, address borrowShare2,,) = market2.getMarket();
+        (,,,,,,,,,,,, address collateralShare3, address borrowShare3,,) = market3.getMarket();
 
         // colShare1 is not supposed to be eq to any other share
         assertNotEq(collateralShare1, collateralShare2, "colShare1 and colShare2 are supposed to be not equal");
@@ -123,9 +124,9 @@ contract MarketTest is Test {
     }
 
     function test_marketsDontHaveAnyShares() public view {
-        (,,,,,,,,,,, address collateralShare1, address borrowShare1,,) = market1.getMarket();
-        (,,,,,,,,,,, address collateralShare2, address borrowShare2,,) = market2.getMarket();
-        (,,,,,,,,,,, address collateralShare3, address borrowShare3,,) = market3.getMarket();
+        (,,,,,,,,,,,, address collateralShare1, address borrowShare1,,) = market1.getMarket();
+        (,,,,,,,,,,,, address collateralShare2, address borrowShare2,,) = market2.getMarket();
+        (,,,,,,,,,,,, address collateralShare3, address borrowShare3,,) = market3.getMarket();
 
         // all markets was supposed to not have colShare1
         assertEq(Share(collateralShare1).balanceOf(address(market1)), 0, "market1 was supposed to not have colShare1");
@@ -159,9 +160,9 @@ contract MarketTest is Test {
     }
 
     function test_usersDontHaveAnyShares() public view {
-        (,,,,,,,,,,, address collateralShare1, address borrowShare1,,) = market1.getMarket();
-        (,,,,,,,,,,, address collateralShare2, address borrowShare2,,) = market2.getMarket();
-        (,,,,,,,,,,, address collateralShare3, address borrowShare3,,) = market3.getMarket();
+        (,,,,,,,,,,,, address collateralShare1, address borrowShare1,,) = market1.getMarket();
+        (,,,,,,,,,,,, address collateralShare2, address borrowShare2,,) = market2.getMarket();
+        (,,,,,,,,,,,, address collateralShare3, address borrowShare3,,) = market3.getMarket();
 
         // all users was supposed to not have colShare1
         assertEq(Share(collateralShare1).balanceOf(adr1), 0, "adr1 was supposed to not have colShare1");
@@ -217,7 +218,7 @@ contract MarketTest is Test {
 
         market1.supply(amountToSend);
 
-        (,,,,,,,,,,,,,, uint marColTokBal) = market1.getMarket();
+        (,,,,,,,,,,,,,,, uint marColTokBal) = market1.getMarket();
         (uint userBorrowIndex, uint userColShareBal, , uint userLTV, , uint userColTokBal) = market1.getUserMarket();
 
         // market must receive some collateral tokens (increased balance)
@@ -254,7 +255,7 @@ contract MarketTest is Test {
 
         market1.borrow(borrowAmount);
 
-        (,,,,,,,,,,,,, uint marBorTokBal,) = market1.getMarket();
+        (,,,,,,,,,,,,,, uint marBorTokBal,) = market1.getMarket();
         (uint userBorrowIndex, , uint userBorShareBal , uint userLTV, uint userBorTokBal,) = market1.getUserMarket();
 
         // market supposed to send some tokens

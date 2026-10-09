@@ -15,12 +15,12 @@ export default buildModule("ProtocolModule", (m) => {
 
   // 2. Деплой Vault 1 и Vault 2
   // Vault 1: Title "Vault1", базовый токен USDC, APY 10%
-  const vaultUSDC = m.contract("Vault", [usdc, "Vault1"], {
+  const vaultUSDC = m.contract("Vault", [usdc, "Vault1", "profiUSDC1"], {
     id: "VaultUSDC",
   });
 
   // Vault 2: Title "Vault 2", базовый токен PryUSD, APY 10%
-  const vaultPryUSD = m.contract("Vault", [pryUsd, "Vault 2"], {
+  const vaultPryUSD = m.contract("Vault", [pryUsd, "Vault 2", "profiUSDC2"], {
     id: "VaultPryUSD",
   });
 
@@ -36,6 +36,8 @@ export default buildModule("ProtocolModule", (m) => {
     "init",
     [
       "Market1",
+      "shareMarket1",
+      "borShareMarket1",
       75n, // 75%
       vaultUSDC,
       100,
@@ -60,6 +62,8 @@ export default buildModule("ProtocolModule", (m) => {
     "init",
     [
       "Market2",
+      "shareMarket2",
+      "borShareMarket2",
       80n, // 80%
       vaultUSDC,
       100,
@@ -84,6 +88,8 @@ export default buildModule("ProtocolModule", (m) => {
     "init",
     [
       "Market3",
+      "shareMarket3",
+      "borShareMarket3",
       85n, // 85%
       vaultUSDC,
       100,

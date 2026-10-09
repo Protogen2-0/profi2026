@@ -20,7 +20,7 @@ contract MarketTest is Test {
     Vault vault1;
 
     function createMarket(
-        string memory title, string memory colShareName, string memory borShareName, uint LLTV, 
+        string memory title, string memory colShareName, string memory borShareName, uint LLTV, uint liquidationCoefficient,
         uint interestRate, uint borrowPrice, uint collateralPrice, uint adminFee, uint64 version
     ) public returns(Market){
         return Market(
@@ -28,7 +28,7 @@ contract MarketTest is Test {
                 address(new Market()), 
                 abi.encodeCall(
                     Market.init, 
-                    (title, colShareName, borShareName, LLTV, address(vault1), borrowPrice, collateralPrice, adminFee, interestRate, ucdc, usdc, version)
+                    (title, colShareName, borShareName, LLTV, address(vault1), liquidationCoefficient, borrowPrice, collateralPrice, adminFee, interestRate, ucdc, usdc, version)
                 )
             ))
         );
@@ -46,9 +46,9 @@ contract MarketTest is Test {
         pryusd  = new PryUSD(adr1, adr2, adr3);
         ucdc    = new UCDC  (adr1, adr2, adr3);
         vault1  = new Vault (usdc, "Vault1", "profiUSDC1");
-        market1 = createMarket("Market1", "shareMarket1", "borrowShareMarket1", 75, 317, 100, 100, 30, 1);
-        market2 = createMarket("Market2", "shareMarket2", "borrowShareMarket2", 80, 500, 100, 100, 30, 1);
-        market3 = createMarket("Market3", "shareMarket3", "borrowShareMarket3", 85, 350, 100, 100, 30, 1);
+        market1 = createMarket("Market1", "shareMarket1", "borrowShareMarket1", 75, 20, 317, 100, 100, 30, 1);
+        market2 = createMarket("Market2", "shareMarket2", "borrowShareMarket2", 80, 20, 500, 100, 100, 30, 1);
+        market3 = createMarket("Market3", "shareMarket3", "borrowShareMarket3", 85, 20, 350, 100, 100, 30, 1);
         vault1.destributeToMarkets(address(market1), address(market2), address(market3));
     }
 

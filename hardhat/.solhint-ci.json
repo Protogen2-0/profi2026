@@ -1,0 +1,16 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "use-natspec": "off",
+    "state-visibility": "off",
+    "gas-small-strings": "off",
+    "var-name-mixedcase": "off",
+    "func-name-mixedcase": "off",
+    "func-visibility": "off",
+    "one-contract-per-file": "off",
+    "compiler-version": "off",
+    "immutable-vars-naming": "off",
+    "gas-custom-errors": "off",
+    "reason-string": "off"
+  }
+}

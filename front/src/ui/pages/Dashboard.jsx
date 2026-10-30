@@ -10,7 +10,7 @@ export const Dashboard = () => {
 
     useEffect(() => {
         let vaultsData = []
-        Vaults.forEach(async (v)=>{
+        Vaults.forEach(v=>{
             vaultsData.push(new MyContract(v.abi, v.address))
         });
         (async()=>{
@@ -25,7 +25,7 @@ export const Dashboard = () => {
         console.log("vaultsData: ", vaultsData)
 
         let marketsData = []
-        Markets.forEach(async (m)=>{
+        Markets.forEach(m=>{
             marketsData.push(new MyContract(m.abi, m.address))
         });
         (async()=>{
@@ -65,7 +65,7 @@ export const Dashboard = () => {
                         <p>collateralPrice:    {market[2]}</p>
                         <p>LLTV:               {market[3]}</p>
                         <p>protocolRevenue:    {market[4]}%</p>
-                        <p>lastAccureBlock:    {market[5]}</p>
+                        <p>lastAccrueBlock:    {market[5]}</p>
                         <p>currentBorrowIndex: {market[6]}</p>
                         <p>InterestRate:       {market[7]}</p>
                         <p>vault:              {market[8]}</p>

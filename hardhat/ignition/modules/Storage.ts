@@ -13,6 +13,13 @@ export default buildModule("ProtocolModule", (m) => {
   const usd1   = m.contract("USD1",   [user1, user2, user3]);
   const dai    = m.contract("DAI",    [user1, user2, user3]);
 
+  const colShare1 = m.contract("Share", [usdt, "colShare1", "CH1", 18], {id:"CH1"});
+  const borShare1 = m.contract("Share", [usdc, "borShare1", "BH1", 18], {id:"BH1"});
+  const colShare2 = m.contract("Share", [usdt, "colShare2", "CH2", 18], {id:"CH2"});
+  const borShare2 = m.contract("Share", [usdc, "borShare2", "BH2", 18], {id:"BH2"});
+  const colShare3 = m.contract("Share", [usdt, "colShare3", "CH3", 18], {id:"CH3"});
+  const borShare3 = m.contract("Share", [usdc, "borShare3", "BH3", 18], {id:"BH3"});
+
   // 2. Деплой Vault 1 и Vault 2
   // Vault 1: Title "Vault1", базовый токен USDC, APY 10%
   const vaultUSDC = m.contract("Vault", [usdc, "Vault1", "profiUSDC1"], {
@@ -36,17 +43,15 @@ export default buildModule("ProtocolModule", (m) => {
     "init",
     [
       "Market1",
-      "shareMarket1",
-      "borShareMarket1",
       75n, // 75%
       vaultUSDC,
+      20,
       100,
       100,
       30,
       317n, // 317 (* 1e8 inside init)
-      usdt,
-      usdc,
-      1,
+      colShare1,
+      borShare1,
     ],
     { id: "EncodeInitMarket1" }
   );
@@ -62,17 +67,15 @@ export default buildModule("ProtocolModule", (m) => {
     "init",
     [
       "Market2",
-      "shareMarket2",
-      "borShareMarket2",
       80n, // 80%
       vaultUSDC,
+      20,
       100,
       100,
       30,
       500n, // 500 (* 1e8 inside init)
-      usd1,
-      usdc,
-      1,
+      colShare2,
+      borShare2,
     ],
     { id: "EncodeInitMarket2" }
   );
@@ -88,17 +91,15 @@ export default buildModule("ProtocolModule", (m) => {
     "init",
     [
       "Market3",
-      "shareMarket3",
-      "borShareMarket3",
       85n, // 85%
       vaultUSDC,
+      20,
       100,
       100,
       30,
       350n, // 350 (* 1e8 inside init)
-      dai,
-      usdc,
-      1,
+      colShare3,
+      borShare3,
     ],
     { id: "EncodeInitMarket3" }
   );

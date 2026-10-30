@@ -2,12 +2,12 @@ import marketABI from './marketABI.json';
 import vaultABI from './vaultABI.json';
 
 export const Markets = [
-    { address:"0x2F415f51FD16900fc1F92943B1F9A07F1b7EEa14", abi:marketABI, title:"Market1" },
-    { address:"0x82567a6F6E3AbE246F62350322a07Af7F413cFe6", abi:marketABI, title:"Market2" },
-    { address:"0xcf950f044E11D2E0318314ecd940ec19abf51130", abi:marketABI, title:"Market3" },
+    { address:"0x46720410Dcf184c67744F325b11457140eb4fA13", abi:marketABI },
+    { address:"0x6f74b8A0466f75E9c19CC55757185757f0Ed123c", abi:marketABI },
+    { address:"0x22CD5Ac63BbDff6705b59BfaA5a92a60A1565731", abi:marketABI },
 ]
 
 export const Vaults = [
-    { address:"0xD91Fb8750Ea1decEf4cEE9D8314f4a60DE039457", abi:vaultABI, title:"Vault1"},
-    { address:"0x2139B5Baf855EEE55Cdb5F19dF50583585581EaD", abi:vaultABI, title:"Vault2"},
+    { address:"0x12c4289C673809d8520ca209aA87b06A768aF8bc", abi:vaultABI },
+    { address:"0xc5E3f7037B925F416C576b699BAc2477c2e9C6d2", abi:vaultABI },
 ]

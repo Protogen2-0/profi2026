@@ -1,4 +1,4 @@
-import {Button, ButtonGroup} from "react-bootstrap";
+import {Button} from "react-bootstrap";
 
 export const RepayFull = ({contract}) => {
     const handle = async () => {
@@ -8,11 +8,9 @@ export const RepayFull = ({contract}) => {
     return (
         <>
             <h2>полное погашение</h2>
-            <ButtonGroup>
-                <Button className={"containerButton"} onClick={() => handle()}>
-                    repayFull
-                </Button>
-            </ButtonGroup>
+            <Button className={"containerButton"} onClick={() => handle()}>
+                repayFull
+            </Button>
         </>
     )
 }

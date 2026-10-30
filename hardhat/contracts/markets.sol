@@ -6,39 +6,46 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgrad
 
 contract Market is ERC4626Upgradeable {
 
+    uint64 version;
+
     string title; 
 
-    uint LLTV; 
-    uint blocksPerYear; 
-    uint lastAccureBlock; 
-    uint currentBorrowIndex;
-    uint InterestRate; 
+    uint256 LLTV; 
+    uint256 blocksPerYear; 
+    uint256 lastAccureBlock; 
+    uint256 currentBorrowIndex;
+    uint256 InterestRate; 
 
-    address vault; // address which will receive 70% from fee  
-    address admin; // address which will receive 30% from fee
+    address vault; // address which will receive (100 - adminFee)% from fee  
 
-    uint adminFee; 
+    uint256 adminFee; 
 
-    uint liquidationCoefficient;
+    uint256 liquidationCoefficient;
 
-    uint borrowPrice; 
-    uint collateralPrice; 
+    uint256 borrowPrice; 
+    uint256 collateralPrice; 
 
     Token collateralToken; 
     Token borrowToken; 
     Share collateralShare; 
     Share borrowShare; 
 
-    mapping (address => uint) userBorrowIndexAtEntry;
+    mapping (address => uint256) userBorrowIndexAtEntry;
 
     // constructor()
     function init(
-        string memory title_, string memory colShareName, string memory borShareName, uint LLTV_, address vault_, uint liquidationCoefficient_,
-        uint borrowPrice_, uint collateralPrice_, uint adminFee_, uint InterestRate_, Token collateralToken_, Token borrowToken_, uint64 version
-    ) public reinitializer(version) {
+        string memory title_, uint256 LLTV_, address vault_, uint256 liquidationCoefficient_, uint256 borrowPrice_, 
+        uint256 collateralPrice_, uint256 adminFee_, uint256 InterestRate_, Share colShare, Share borShare
+    ) public reinitializer(++version) {
 
-        __ERC4626_init(IERC20(collateralToken_));
-        __ERC20_init(collateralToken_.name(), collateralToken_.symbol());
+        collateralShare = colShare;
+        borrowShare     = borShare;
+
+        collateralToken = Token(collateralShare.asset());
+        borrowToken     = Token(borrowShare.asset());
+
+        __ERC4626_init(IERC20(collateralToken));
+        __ERC20_init(collateralToken.name(), collateralToken.symbol());
 
         title = title_;
 
@@ -49,7 +56,6 @@ contract Market is ERC4626Upgradeable {
         InterestRate = InterestRate_ * 1e8;
 
         vault = vault_;
-        admin = Vault(vault).owner();
 
         adminFee = adminFee_;
 
@@ -57,61 +63,55 @@ contract Market is ERC4626Upgradeable {
 
         borrowPrice = borrowPrice_;
         collateralPrice = collateralPrice_;
-
-        collateralToken = collateralToken_;
-        borrowToken     = borrowToken_;
-
-        collateralShare = new Share(address(collateralToken), colShareName, collateralToken.symbol(), collateralToken.decimals());
-        borrowShare     = new Share(address(borrowToken),     borShareName,     borrowToken.symbol(),     borrowToken.decimals());
     }
 
     modifier updateIndexAndLTV(address user) {
         currentBorrowIndex += currentBorrowIndex * InterestRate * (block.number - lastAccureBlock) / (blocksPerYear * 1e12); //1e12 is precision
         lastAccureBlock = block.number;
         _;
-        if(LTV(user) >= LLTV) liquidate(user);
+        if(LTV(user) > LLTV) liquidate(user);
     }
 
     function liquidate(address user) public {
-        uint collateralBalance = collateralShare.balanceOf(user);
+        uint256 collateralBalance = collateralShare.balanceOf(user);
         collateralToken.transfer(address(this), user, collateralBalance * liquidationCoefficient / 100);
         collateralShare.burn(user, collateralBalance);
         borrowShare.burn(user, borrowShare.balanceOf(user));
     }
 
-    function accruedInterest(address user) public view returns(uint){
+    function accruedInterest(address user) public view returns(uint256){
         return borrowShare.balanceOf(user) * (currentBorrowIndex - userBorrowIndexAtEntry[user]) / 1e18;  // 1e18 is WAD
     }
 
-    function totalDept(address user) public view returns(uint){
+    function totalDept(address user) public view returns(uint256){
         return borrowShare.balanceOf(user) * currentBorrowIndex / 1e18; // 1e18 is WAD
     }
 
-    function LTV(address user) public view returns(uint){
+    function LTV(address user) public view returns(uint256){
         if(borrowShare.balanceOf(user) == 0) return 0;
         if(collateralShare.balanceOf(user) == 0) return LLTV + 1;
     // formula : 100% * (borrowAmount  * borrowPrice)  / (       collateralAmount          * collateralPrice)
         return ( 100 * totalDept(user) * borrowPrice ) / ( collateralShare.balanceOf(user) * collateralPrice ); 
     }
     
-    function supply(uint amount) public updateIndexAndLTV(msg.sender) {
+    function supply(uint256 amount) public updateIndexAndLTV(msg.sender) {
         collateralToken.transfer(msg.sender, address(this), amount);
         collateralShare.mint(msg.sender, amount);
     }
 
-    function borrow(uint amount) public updateIndexAndLTV(msg.sender) {
+    function borrow(uint256 amount) public updateIndexAndLTV(msg.sender) {
         if(borrowShare.balanceOf(msg.sender) == 0) userBorrowIndexAtEntry[msg.sender] = currentBorrowIndex;
         borrowToken.transfer(address(this), msg.sender, amount);
         borrowShare.mint(msg.sender, amount * 1e18 / currentBorrowIndex);  // 1e18 is WAD
     }
 
-    function repayPart(uint amount) public updateIndexAndLTV(msg.sender) {
+    function repayPart(uint256 amount) public updateIndexAndLTV(msg.sender) {
         require(amount > 0, "amount must be > 0");
-        uint startInterest = accruedInterest(msg.sender);
-        uint amountToVault;
-        uint amountToAdmin;
+        uint256 startInterest = accruedInterest(msg.sender);
+        uint256 amountToAdmin;
+        uint256 amountToVault;
         // paying only %, doesnt burn any shares (payment will be after if-else)
-        if(amount <= startInterest){
+        if(amount < startInterest){
             amountToAdmin = amount * adminFee / 100;
             amountToVault = amount - amountToAdmin;
             // increasing entry borrow index to reduce user dept percentage, other params used in % formula shouldn't be changed
@@ -130,62 +130,61 @@ contract Market is ERC4626Upgradeable {
             // clearing dept percentage
             userBorrowIndexAtEntry[msg.sender] = currentBorrowIndex;
             // calculating amount of tokens which will reduce dept body
-            uint payment = amount - startInterest;
+            uint256 payment = amount - startInterest;
             // transfering tokens to market and burning shares to reduce dept
             borrowToken.transfer(msg.sender, address(this), payment);
             borrowShare.burn(msg.sender, payment * 1e18 / currentBorrowIndex); // 1e18 is WAD
         }
-        // transfering fee to vault and admin in 70:30 ratio
+        // transfering fee to vault and market in 70:30 ratio
         borrowToken.transfer(msg.sender, vault, amountToVault);
-        borrowToken.transfer(msg.sender, admin, amountToAdmin);
+        borrowToken.transfer(msg.sender, address(this), amountToAdmin);
         // telling vault that we sended him tokens
         Vault(vault).increaseAssets(amountToVault);
     }
 
     function repayFull() public updateIndexAndLTV(msg.sender) {
         // dept percentage
-        uint interest = accruedInterest(msg.sender);
-        uint vaultAmount = interest * (100 - adminFee) / 100;
-        // transfering fee to vault and admin in 70:30 ratio
-        borrowToken.transfer(msg.sender, vault, vaultAmount);
-        borrowToken.transfer(msg.sender, admin, interest * adminFee / 100);
-        // telling vault that we sended him tokens
-        Vault(vault).increaseAssets(vaultAmount);
+        uint256 interest = accruedInterest(msg.sender);
+        uint256 vaultAmount = interest * (100 - adminFee) / 100;
         // clearing dept percentage
         userBorrowIndexAtEntry[msg.sender] = currentBorrowIndex;
+        // transfering fee to vault and market in 70:30 ratio
+        borrowToken.transfer(msg.sender, vault, vaultAmount);
+        borrowToken.transfer(msg.sender, address(this), interest * adminFee / 100);
+        // telling vault that we sended him tokens
+        Vault(vault).increaseAssets(vaultAmount);
         // transfering dept body to market and burning all shares
         borrowToken.transfer(msg.sender, address(this), totalDept(msg.sender) - interest);
         borrowShare.burn(msg.sender, borrowShare.balanceOf(msg.sender));
     }
 
-    function withdrawPart(uint amount) public updateIndexAndLTV(msg.sender) {
+    function withdrawPart(uint256 amount) public updateIndexAndLTV(msg.sender) {
         collateralToken.transfer(address(this), msg.sender, amount);
         collateralShare.burn(msg.sender, amount);
     }
 
     function withdrawFull() public updateIndexAndLTV(msg.sender) {
-        uint amount = collateralShare.balanceOf(msg.sender);
+        uint256 amount = collateralShare.balanceOf(msg.sender);
         collateralToken.transfer(address(this), msg.sender, amount);
         collateralShare.burn(msg.sender, amount);
     }
 
     function getMarket() public view returns(
         string memory,
-        uint,
-        uint,
-        uint,
-        uint,
-        uint,
-        uint,
-        uint,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
         address,
         address,
         address,
         address,
         address,
-        address,
-        uint,
-        uint
+        uint256,
+        uint256
     ){
         return(
             title,
@@ -197,7 +196,6 @@ contract Market is ERC4626Upgradeable {
             currentBorrowIndex,
             InterestRate * 100 / 1e12, //1e12 is precision
             vault,
-            admin,
             address(collateralToken),
             address(borrowToken),
             address(collateralShare),
@@ -208,12 +206,12 @@ contract Market is ERC4626Upgradeable {
     }
 
     function getUserMarket() public view returns(
-        uint,
-        uint,
-        uint,
-        uint,
-        uint,
-        uint
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256
     ){
         return(
             userBorrowIndexAtEntry[msg.sender],

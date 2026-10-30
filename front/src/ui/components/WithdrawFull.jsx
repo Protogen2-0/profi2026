@@ -1,4 +1,4 @@
-import {Button, ButtonGroup} from "react-bootstrap";
+import {Button} from "react-bootstrap";
 
 export const WithdrawFull = ({contract}) => {
     const handle = async () => {
@@ -6,13 +6,11 @@ export const WithdrawFull = ({contract}) => {
     }
 
     return (
-        <div style={{verticalAlign: "center"}}>
+        <>
             <h2>вывод средств</h2>
-            <ButtonGroup>
-                <Button className="containerButton" onClick={() => handle()}>
-                    withdrawFull
-                </Button>
-            </ButtonGroup>
-        </div>
+            <Button className="containerButton" onClick={() => handle()}>
+                withdrawFull
+            </Button>
+        </>
     )
 }

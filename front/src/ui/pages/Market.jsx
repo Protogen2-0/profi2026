@@ -37,11 +37,11 @@ export const Market = () => {
             {wallet ?
                 markets.map((market, i) => (
                     <div key={i} className="container">
-                        <h2>market  {i + 1} {market.address}</h2>
+                        <h2>market {i + 1} {market.address}</h2>
                         <Row className={"container2"}>
                             <Col className={"column"}>
-                                {actions.map((action, i) => (
-                                    <div key={i}>
+                                {actions.map((action, j) => (
+                                    <div key={j}>
                                         <h3>{action}</h3>
                                         <FormControl
                                             type={"number"}

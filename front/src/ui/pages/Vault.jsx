@@ -1,11 +1,11 @@
 import {Header} from "../components/Header.jsx";
-import {useContext, useEffect, useState} from "react";
 import {MyContext} from "../../core/Context.jsx";
 import {Vaults} from "../../service/contracts.js";
 import MyContract from "../../service/Contract.jsx";
+import {useContext, useEffect, useState} from "react";
+import {WithdrawFull} from "../components/WithdrawFull.jsx";
 import {Button, Col, FormControl, Row} from "react-bootstrap";
 import {DistributeToMarkets} from "../components/DistributeToMarkets.jsx";
-import {WithdrawFull} from "../components/WithdrawFull.jsx";
 
 export const Vault = () => {
     const {wallet} = useContext(MyContext)
@@ -40,8 +40,8 @@ export const Vault = () => {
                         <h2>vault  {i + 1} {vault.address}</h2>
                         <Row className={"container2"}>
                             <Col className={"column"}>
-                            {actions.map((action,i ) => (
-                                <div key={i}>
+                            {actions.map((action,j ) => (
+                                <div key={j}>
                                     <h3>{action}</h3>
                                     <FormControl
                                         type={"number"}
@@ -50,7 +50,7 @@ export const Vault = () => {
                                         onChange={e => setAmount(e.target.value)}
                                     />
                                     <Button className="containerButton" onClick={() => handle(vault, action)}>
-                                            {action}
+                                        {action}
                                     </Button>
                                 </div>
                             ))}

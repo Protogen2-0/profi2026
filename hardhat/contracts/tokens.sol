@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 
 contract Token is ERC20{
     uint8 immutable _decimals;
@@ -17,15 +18,15 @@ contract Token is ERC20{
         return _decimals;
     }
 
-    function mint(address account, uint amount) public {
+    function mint(address account, uint256 amount) public {
         super._mint(account, amount);
     }
 
-    function burn(address account, uint amount) public {
+    function burn(address account, uint256 amount) public {
         super._burn(account, amount);
     }
 
-    function transfer(address from, address to, uint amount) public{
+    function transfer(address from, address to, uint256 amount) public{
         super._transfer(from, to, amount);
     }
 }
@@ -60,8 +61,6 @@ contract DAI is Token{
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
-
 contract Share is ERC4626{
     uint8 immutable _decimals;
 
@@ -73,11 +72,11 @@ contract Share is ERC4626{
         return _decimals;
     }
 
-    function burn(address account, uint amount) public {
+    function burn(address account, uint256 amount) public {
         super._burn(account, amount);
     }
 
-    function mint(address account, uint amount) public {
+    function mint(address account, uint256 amount) public {
         super._mint(account, amount);
     }
 }

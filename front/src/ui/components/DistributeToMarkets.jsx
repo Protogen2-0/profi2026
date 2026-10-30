@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {Button, FormControl, FormGroup} from "react-bootstrap";
+import {Button, FormControl} from "react-bootstrap";
 
 export const DistributeToMarkets = ({contract}) => {
 
@@ -13,29 +13,27 @@ export const DistributeToMarkets = ({contract}) => {
 
     return (
         <>
-            <FormGroup>
-                <h2>распределение по markets</h2>
-                <FormControl
-                    type={"address"}
-                    placeholder={"0x000000"}
-                    value={address1}
-                    onChange={e => setAddress1(e.target.value)}
-                />
-                <hr/>
-                <FormControl
-                    type={"address"}
-                    placeholder={"0x000000"}
-                    value={address2}
-                    onChange={e => setAddress2(e.target.value)}
-                />
-                <hr/>
-                <FormControl
-                    type={"address"}
-                    placeholder={"0x000000"}
-                    value={address3}
-                    onChange={e => setAddress3(e.target.value)}
-                />
-            </FormGroup>
+            <h2>распределение по markets</h2>
+            <FormControl
+                type={"address"}
+                placeholder={"0x000000"}
+                value={address1}
+                onChange={e => setAddress1(e.target.value)}
+            />
+            <hr/>
+            <FormControl
+                type={"address"}
+                placeholder={"0x000000"}
+                value={address2}
+                onChange={e => setAddress2(e.target.value)}
+            />
+            <hr/>
+            <FormControl
+                type={"address"}
+                placeholder={"0x000000"}
+                value={address3}
+                onChange={e => setAddress3(e.target.value)}
+            />
             <Button className="containerButton" onClick={() => handle(address1, address2, address3)}>
                 distributeToMarkets
             </Button>

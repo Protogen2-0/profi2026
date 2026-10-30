@@ -1,9 +1,9 @@
-import {MyContext} from "../../core/Context.jsx";
-import {useContext, useEffect, useState} from "react";
-import {Header} from "../components/Header.jsx";
 import {Button} from "react-bootstrap";
-import {Markets, Vaults} from "../../service/contracts.js";
+import {Header} from "../components/Header.jsx";
+import {MyContext} from "../../core/Context.jsx";
 import MyContract from "../../service/Contract.jsx";
+import {useContext, useEffect, useState} from "react";
+import {Markets, Vaults} from "../../service/contracts.js";
 
 export const User = () =>{
     const {wallet, login} = useContext(MyContext)
@@ -29,7 +29,7 @@ export const User = () =>{
             console.log("vaultData: ", vaultsData)
 
             let marketsData = []
-            Markets.forEach(async (m)=>{
+            Markets.forEach(m=>{
                 marketsData.push(new MyContract(m.abi, m.address))
             });
             (async()=>{
@@ -44,7 +44,6 @@ export const User = () =>{
             console.log("marketsData: ", marketsData)
         }
     },[wallet])
-
 
     return(
         <>
